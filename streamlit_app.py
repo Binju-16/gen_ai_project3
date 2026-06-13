@@ -87,6 +87,14 @@ def run_study_sense(user_message: str):
     raise RuntimeError("Tool loop exceeded the maximum number of iterations.")
 
 
+# Predefined test prompts useful for quick local evaluation and debugging
+SAMPLE_PROMPTS = [
+    ("Definition request", "Explain agentic behavior in AI and when I should use a tool."),
+    ("Course grounding request", "What is grounding and why does it matter for this project?"),
+    ("Combined study question", "Define mocking in testing and find course guidance on evaluation."),
+]
+
+
 def display_tool_trace(tool_trace):
     if not tool_trace:
         return
@@ -133,6 +141,26 @@ def main():
                     st.json(choice["function_call"])
             except Exception as exc:
                 st.error(str(exc))
+
+    st.markdown("---")
+    st.subheader("Quick tests")
+
+    with st.expander("Run sample prompts and validate tool dispatch"):
+        st.write("Use these canned prompts to verify the model calls tools and returns grounded answers.")
+        if st.button("Run sample prompts"):
+            for title, prompt in SAMPLE_PROMPTS:
+                st.markdown(f"**{title}**")
+                st.write(f"Prompt: {prompt}")
+                try:
+                    ans, trace, choice = run_study_sense(prompt)
+                    st.markdown("**Answer**")
+                    st.write(ans)
+                    if trace:
+                        st.markdown("**Tool trace**")
+                        display_tool_trace(trace)
+                    st.markdown("---")
+                except Exception as e:
+                    st.error(f"{title} failed: {e}")
 
 
 if __name__ == "__main__":

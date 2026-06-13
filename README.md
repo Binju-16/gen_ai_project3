@@ -81,7 +81,27 @@ Use the following commit messages as a guide when saving your work:
 
 ## Deployment
 
-This app is ready for deployment to platforms like Railway, Render, or Heroku using `uvicorn app:app --host=0.0.0.0 --port=${PORT:-8000}`. A `procfile` is included for easy deployment.
+This app can be deployed either as the original FastAPI backend or as the Streamlit frontend. Example deployment options:
+
+- FastAPI (existing):
+
+  ```bash
+  uvicorn app:app --host=0.0.0.0 --port=${PORT:-8000}
+  ```
+
+- Streamlit (recommended for interactive study UI):
+
+  Example `Procfile` entry for platforms like Heroku:
+
+  ```text
+  web: sh -c 'streamlit run streamlit_app.py --server.port=${PORT:-8501} --server.address=0.0.0.0'
+  ```
+
+  Or run locally:
+
+  ```bash
+  streamlit run streamlit_app.py
+  ```
 
 ## Example interaction
 
