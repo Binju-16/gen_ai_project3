@@ -3,12 +3,15 @@ import os
 from pathlib import Path
 from typing import Any, Dict
 
+from dotenv import load_dotenv
 import httpx
 import openai
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent
 DATA_DIR = BASE_DIR / "data"
