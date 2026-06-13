@@ -21,10 +21,10 @@
       }
     }
   ],
-  "final_answer": "I'm sorry, but I couldn't find a specific definition for \"agentic behavior in AI\" in my dictionary sources. However, in general terms, agentic behavior refers to actions performed by an agent (in this case, an AI) that are autonomous, goal-directed, and adaptive. It's about the AI making decisions and taking actions on its own, based on its programming and the data it has.\n\nAs for when to use a tool, you should use a tool when you need to perform a specific task or function that the tool is designed to handle. For example, in our context, you can use the lookup_dictionary_entry tool when you need to find the definition, concept explanation, or example usage of a technical term. You can use the search_course_notes tool when you need course-specific guidance, concept grounding, study advice, or context about generative AI topics.",
+  "final_answer": "I'm sorry, but I couldn't find a specific definition for \"agentic behavior in AI\". However, in general terms, agentic behavior refers to actions performed by an agent, which in the context of AI, could be an AI system or model. It involves the AI making decisions or taking actions autonomously based on its programming and the data it has been trained on.\n\nAs for when to use a tool, you should use a tool when you need to perform a specific task or function that the tool is designed for. For example, you would use a dictionary tool when you need to look up the definition of a term, or a course notes tool when you need to review material from a specific course.",
   "raw": {
     "role": "assistant",
-    "content": "I'm sorry, but I couldn't find a specific definition for \"agentic behavior in AI\" in my dictionary sources. However, in general terms, agentic behavior refers to actions performed by an agent (in this case, an AI) that are autonomous, goal-directed, and adaptive. It's about the AI making decisions and taking actions on its own, based on its programming and the data it has.\n\nAs for when to use a tool, you should use a tool when you need to perform a specific task or function that the tool is designed to handle. For example, in our context, you can use the lookup_dictionary_entry tool when you need to find the definition, concept explanation, or example usage of a technical term. You can use the search_course_notes tool when you need course-specific guidance, concept grounding, study advice, or context about generative AI topics.",
+    "content": "I'm sorry, but I couldn't find a specific definition for \"agentic behavior in AI\". However, in general terms, agentic behavior refers to actions performed by an agent, which in the context of AI, could be an AI system or model. It involves the AI making decisions or taking actions autonomously based on its programming and the data it has been trained on.\n\nAs for when to use a tool, you should use a tool when you need to perform a specific task or function that the tool is designed for. For example, you would use a dictionary tool when you need to look up the definition of a term, or a course notes tool when you need to review material from a specific course.",
     "refusal": null,
     "annotations": []
   }
@@ -162,10 +162,10 @@
       }
     }
   ],
-  "final_answer": "In the context of your project, \"grounding\" likely refers to the concept of providing a foundation or basic understanding in a particular subject. It's the process of instructing in elements or first principles. Grounding matters in your project because it ensures that you have a solid understanding of the fundamental concepts and principles that your project is based on. This foundational knowledge is crucial for making informed decisions and for the successful execution of your project.",
+  "final_answer": "In the context of your project, grounding refers to the concept of providing a solid foundation or basic education in a particular subject. It involves instructing in elements or first principles. Grounding is important because it ensures that you have a fundamental understanding of the subject matter, which is crucial for deeper learning and application. In the context of generative AI, grounding might involve understanding the basics of machine learning, neural networks, and natural language processing.",
   "raw": {
     "role": "assistant",
-    "content": "In the context of your project, \"grounding\" likely refers to the concept of providing a foundation or basic understanding in a particular subject. It's the process of instructing in elements or first principles. Grounding matters in your project because it ensures that you have a solid understanding of the fundamental concepts and principles that your project is based on. This foundational knowledge is crucial for making informed decisions and for the successful execution of your project.",
+    "content": "In the context of your project, grounding refers to the concept of providing a solid foundation or basic education in a particular subject. It involves instructing in elements or first principles. Grounding is important because it ensures that you have a fundamental understanding of the subject matter, which is crucial for deeper learning and application. In the context of generative AI, grounding might involve understanding the basics of machine learning, neural networks, and natural language processing.",
     "refusal": null,
     "annotations": []
   }
@@ -193,10 +193,10 @@
       }
     }
   ],
-  "final_answer": "I'm sorry, but I couldn't find a specific definition for \"mocking in testing\" in the dictionary. However, in software testing, mocking is a technique where a mock object is created to simulate the behavior of a real object. This is done to isolate the system under test from the behavior of its dependencies. Mock objects can return specific values and have their interactions verified after the test is run.\n\nNow, let's find some course-specific guidance on evaluation.",
+  "final_answer": "I'm sorry, but I couldn't find a specific definition for \"mocking in testing\" in the dictionary. However, in the context of software testing, mocking is a technique where a portion of the system under test (like a function or an object) is replaced with a fake or 'mock' version. This mock version simulates the behavior of the real component, allowing developers to isolate and test specific parts of their code. \n\nNow, let's find some course-specific guidance on evaluation.",
   "raw": {
     "role": "assistant",
-    "content": "I'm sorry, but I couldn't find a specific definition for \"mocking in testing\" in the dictionary. However, in software testing, mocking is a technique where a mock object is created to simulate the behavior of a real object. This is done to isolate the system under test from the behavior of its dependencies. Mock objects can return specific values and have their interactions verified after the test is run.\n\nNow, let's find some course-specific guidance on evaluation.",
+    "content": "I'm sorry, but I couldn't find a specific definition for \"mocking in testing\" in the dictionary. However, in the context of software testing, mocking is a technique where a portion of the system under test (like a function or an object) is replaced with a fake or 'mock' version. This mock version simulates the behavior of the real component, allowing developers to isolate and test specific parts of their code. \n\nNow, let's find some course-specific guidance on evaluation.",
     "refusal": null,
     "annotations": []
   }
