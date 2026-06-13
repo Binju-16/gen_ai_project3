@@ -3,9 +3,13 @@ import json
 import os
 from typing import Any, Dict
 
+from dotenv import load_dotenv
 import streamlit as st
 
 from app import SYSTEM_PROMPT, call_openai_chat, lookup_dictionary_entry, search_course_notes
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 def run_async(coro):
@@ -73,14 +77,24 @@ def run_study_sense(user_message: str):
                     "function_call": {"name": tool_name, "arguments": json.dumps(args)},
                 }
             )
+            # Append tool result as assistant content to avoid role='tool' compatibility issues
             messages.append(
                 {
-                    "role": "tool",
-                    "name": tool_name,
-                    "content": json.dumps(tool_result),
+                    "role": "assistant",
+                    "content": json.dumps({"tool": tool_name, "result": tool_result}),
                 }
             )
-            continue
+            
+            # Call the model WITHOUT the `functions` parameter to get final grounded answer
+            import openai
+            second_resp = openai.ChatCompletion.create(
+                model="gpt-4-0613",
+                messages=messages,
+                temperature=0.2,
+            )
+            second_choice = second_resp["choices"][0]["message"]
+            final_answer = second_choice.get("content", "")
+            return final_answer, tool_trace, second_choice
 
         return message.get("content", ""), tool_trace, choice
 
