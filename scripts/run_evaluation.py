@@ -107,11 +107,11 @@ def main():
         for result in results:
             handle.write(f"## {result['name']}\n\n")
             handle.write(f"**Input:** {result['input']}\n\n")
-            handle.write("**Model response:**\n\n```
-")
+            handle.write("**Model response:**\n\n```")
+            handle.write("\n")
             handle.write(json.dumps(result['message'], indent=2))
-            handle.write("\n```
-\n\n")
+            handle.write("\n```")
+            handle.write("\n\n")
     print(f"Evaluation results written to {OUTPUT_FILE}")
 
 

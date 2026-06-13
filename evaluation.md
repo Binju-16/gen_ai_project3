@@ -1,28 +1,59 @@
 # Evaluation Results
 
-## Overview
+## Definition request
 
-This evaluation documents how StudySense behaves on representative prompts and whether it uses the MCP tools correctly.
+**Input:** Explain agentic behavior in AI and when I should use a tool.
 
-## Evaluation process
+**Model response:**
 
-- Run the sample prompts from `scripts/run_evaluation.py`.
-- Confirm the model returns a tool call when appropriate.
-- Confirm the final answer is grounded in the returned tool data.
+```
+{
+  "role": "assistant",
+  "content": null,
+  "function_call": {
+    "name": "lookup_dictionary_entry",
+    "arguments": "{\n  \"word\": \"agentic behavior in AI\"\n}"
+  },
+  "refusal": null,
+  "annotations": []
+}
+```
 
-## Sample prompts
+## Course grounding request
 
-1. Definition request: `Explain agentic behavior in AI and when I should use a tool.`
-2. Course grounding request: `What is grounding and why does it matter for this project?`
-3. Combined study question: `Define mocking in testing and find course guidance on evaluation.`
+**Input:** What is grounding and why does it matter for this project?
 
-## Success criteria
+**Model response:**
 
-- The model makes at least one tool call in a real session.
-- The tool result is included in the final answer.
-- The model decides whether to use `lookup_dictionary_entry` or `search_course_notes` based on the prompt.
-- The final answer is accurate, useful, and grounded.
+```
+{
+  "role": "assistant",
+  "content": null,
+  "function_call": {
+    "name": "lookup_dictionary_entry",
+    "arguments": "{\n  \"word\": \"grounding\"\n}"
+  },
+  "refusal": null,
+  "annotations": []
+}
+```
 
-## Results
+## Combined study question
 
-> Run `python3 scripts/run_evaluation.py` once `OPENAI_API_KEY` is configured. The generated response content and tool trace will be written to this file.
+**Input:** Define mocking in testing and find course guidance on evaluation.
+
+**Model response:**
+
+```
+{
+  "role": "assistant",
+  "content": null,
+  "function_call": {
+    "name": "lookup_dictionary_entry",
+    "arguments": "{\n  \"word\": \"mocking in testing\"\n}"
+  },
+  "refusal": null,
+  "annotations": []
+}
+```
+
