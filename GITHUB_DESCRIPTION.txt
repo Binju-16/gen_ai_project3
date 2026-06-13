@@ -1,0 +1,10 @@
+StudySense is an agentic AI study companion built for a Generative AI course project. It uses a custom OpenAI function-calling workflow to decide when to invoke grounded tools for definitions and course-specific guidance.
+
+Key features:
+- Streamlit interface for interactive study questions.
+- MCP-style tool dispatch with `lookup_dictionary_entry` and `search_course_notes`.
+- Live dictionary lookup plus fallback content for reliable definitions.
+- Course note grounding to keep answers aligned with project concepts.
+- Evaluation harness that documents tool usage and model behavior.
+
+This repository demonstrates agentic decision-making, prompt engineering, and grounded LLM responses in a study assistant app.
