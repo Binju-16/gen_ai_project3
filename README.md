@@ -1,6 +1,6 @@
 # StudySense — Project 3 AI Study Companion
 
-StudySense is a capstone draft app for the Generative AI course. It combines a custom MCP tool, agentic decision making, prompt engineering, grounding, and a deployed-ready web interface.
+StudySense is a capstone app for the Generative AI course built around an interactive Streamlit interface. It combines a custom MCP tool workflow, agentic decision making, prompt engineering, grounding, and live study support for course concepts.
 
 ## Problem statement
 
@@ -14,8 +14,9 @@ Students often need quick, reliable concept explanations and examples while stud
 
 ## System architecture
 
-- `app.py`: FastAPI backend that serves the UI and handles the chat API.
-- `templates/index.html`: Simple frontend allowing users to ask questions.
+- `app.py`: FastAPI backend that handles the chat API.
+- `streamlit_app.py`: Streamlit front-end for interactive study sessions and tool tracing.
+- `templates/index.html`: Simple fallback web frontend allowing users to ask questions.
 - `static/style.css`: UI styling.
 - `data/fallback_dictionary.json`: Local fallback data used when the live dictionary API is unavailable.
 - `data/course_notes.json`: Local course notes used by the `search_course_notes` tool for domain grounding.
@@ -55,13 +56,28 @@ pip install -r requirements.txt
 export OPENAI_API_KEY="your_api_key_here"
 ```
 
-5. Run the app:
+5. Run the app locally using Streamlit:
+
+```bash
+streamlit run streamlit_app.py
+```
+
+6. Alternatively, run the FastAPI backend:
 
 ```bash
 uvicorn app:app --reload
 ```
 
-6. Open `http://127.0.0.1:8000` in your browser.
+## Recommended commit messages
+Use the following commit messages as a guide when saving your work:
+
+- `feat: add Streamlit front-end and interactive study UI`
+- `feat: implement MCP tools and tool dispatch`
+- `docs: update README with Streamlit setup and project architecture`
+- `test: add evaluation harness and sample model cases`
+- `chore: add commit guidance and GitHub description`
+
+7. Open the Streamlit app in your browser at the URL shown by Streamlit.
 
 ## Deployment
 
