@@ -1,0 +1,82 @@
+{
+  "agentic": {
+    "word": "agentic",
+    "phonetics": "",
+    "meanings": [
+      {
+        "part_of_speech": "adjective",
+        "definitions": [
+          {
+            "definition": "Describing a system or behavior in which an AI model makes its own decisions about what actions to take, including whether to call tools.",
+            "example": "An agentic assistant decides to call a dictionary tool when it needs a definition.",
+            "synonyms": ["autonomous", "decisive"]
+          }
+        ]
+      }
+    ]
+  },
+  "grounding": {
+    "word": "grounding",
+    "phonetics": "",
+    "meanings": [
+      {
+        "part_of_speech": "noun",
+        "definitions": [
+          {
+            "definition": "The process of giving an LLM access to information it could not infer from training alone, such as a live API response or a curated document.",
+            "example": "Providing a tool result to the model is one form of grounding.",
+            "synonyms": ["contextualization", "anchoring"]
+          }
+        ]
+      }
+    ]
+  },
+  "prompt engineering": {
+    "word": "prompt engineering",
+    "phonetics": "",
+    "meanings": [
+      {
+        "part_of_speech": "noun",
+        "definitions": [
+          {
+            "definition": "The practice of designing and refining prompts so that an LLM performs a task more reliably and accurately.",
+            "example": "I used prompt engineering to teach the model when to call the lookup tool.",
+            "synonyms": ["prompt design", "prompt tuning"]
+          }
+        ]
+      }
+    ]
+  },
+  "tool": {
+    "word": "tool",
+    "phonetics": "",
+    "meanings": [
+      {
+        "part_of_speech": "noun",
+        "definitions": [
+          {
+            "definition": "In MCP, a tool is a function or API the model can call to retrieve information or perform an action that it cannot do from training alone.",
+            "example": "The model called the lookup_dictionary_entry tool to get a definition.",
+            "synonyms": ["function", "action"]
+          }
+        ]
+      }
+    ]
+  },
+  "rubric": {
+    "word": "rubric",
+    "phonetics": "",
+    "meanings": [
+      {
+        "part_of_speech": "noun",
+        "definitions": [
+          {
+            "definition": "A set of criteria used to evaluate a project or assignment.",
+            "example": "I used the Project 3 rubric to design the agentic behavior and documentation.",
+            "synonyms": ["guideline", "criteria"]
+          }
+        ]
+      }
+    ]
+  }
+}

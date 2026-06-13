@@ -1,0 +1,24 @@
+{
+  "notes": [
+    {
+      "topic": "Prompt engineering",
+      "content": "Prompt engineering is the practice of designing prompts that guide an LLM to produce the desired output. It includes role definition, examples, and constraints."
+    },
+    {
+      "topic": "Grounding",
+      "content": "Grounding provides the model with external or structured context it could not know from its training data, such as tool results, documents, or a database."
+    },
+    {
+      "topic": "Agentic behavior",
+      "content": "Agentic behavior means the model decides whether to call a tool, reads the result, and chooses what to do next instead of the application hardcoding the flow."
+    },
+    {
+      "topic": "MCP tool",
+      "content": "An MCP tool is defined with a name, description, and input schema, and the model can call it during execution. The application executes the tool and returns results to the model."
+    },
+    {
+      "topic": "Evaluation",
+      "content": "Evaluation should include test cases, actual outputs, and a description of what success looks like, including both passes and failures."
+    }
+  ]
+}

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>StudySense AI Companion</title>
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header>
+      <h1>StudySense</h1>
+      <p>Your agentic study assistant with a live dictionary lookup tool.</p>
+    </header>
+
+    <main>
+      <section class="chat-panel">
+        <div id="chat-log" class="chat-log"></div>
+      </section>
+
+      <section class="input-panel">
+        <textarea id="user-input" placeholder="Ask a study question or request a definition..."></textarea>
+        <button id="send-button">Send</button>
+      </section>
+    </main>
+
+    <footer>
+      <p>Built for Project 3: one custom MCP tool + autonomous model decisions.</p>
+    </footer>
+  </div>
+
+  <script>
+    const chatLog = document.getElementById('chat-log');
+    const userInput = document.getElementById('user-input');
+    const sendButton = document.getElementById('send-button');
+
+    function addMessage(role, text) {
+      const messageEl = document.createElement('div');
+      messageEl.className = 'chat-message ' + role;
+      messageEl.innerHTML = `<strong>${role === 'user' ? 'You' : 'StudySense'}:</strong> ${text}`;
+      chatLog.appendChild(messageEl);
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    function addToolTrace(trace) {
+      if (!trace.length) return;
+      const traceEl = document.createElement('div');
+      traceEl.className = 'tool-trace';
+      traceEl.innerHTML = '<strong>Tool trace:</strong><pre>' + JSON.stringify(trace, null, 2) + '</pre>';
+      chatLog.appendChild(traceEl);
+      chatLog.scrollTop = chatLog.scrollHeight;
+    }
+
+    async function sendMessage() {
+      const text = userInput.value.trim();
+      if (!text) return;
+      addMessage('user', text);
+      userInput.value = '';
+      addMessage('assistant', 'Thinking...');
+
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text }),
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+          throw new Error(data.detail || 'Chat request failed');
+        }
+
+        chatLog.removeChild(chatLog.lastChild);
+        addMessage('assistant', data.answer);
+        addToolTrace(data.tool_trace || []);
+      } catch (error) {
+        chatLog.removeChild(chatLog.lastChild);
+        addMessage('assistant', 'Error: ' + error.message);
+      }
+    }
+
+    sendButton.addEventListener('click', sendMessage);
+    userInput.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+      }
+    });
+  </script>
+</body>
+</html>
