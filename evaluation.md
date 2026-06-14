@@ -2,6 +2,8 @@
 
 *This document was regenerated from the latest MentorMate app implementation using `scripts/run_full_evaluation.py`.*
 
+_Last updated: 2026-06-13_
+
 ## Definition comparison
 
 **Input:** What is the difference between prompt engineering and fine-tuning in generative AI?
