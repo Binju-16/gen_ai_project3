@@ -186,6 +186,6 @@ This app can be deployed either as the original FastAPI backend or as the Stream
 
 Deployment URL:
 
-https://your-app.streamlit.app
+https://binjugenaiproject3.streamlit.app/
 
 The deployed application allows users to interact with MentorMate through the Streamlit interface and observe tool traces generated during agent execution.
