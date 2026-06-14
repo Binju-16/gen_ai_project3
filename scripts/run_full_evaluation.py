@@ -83,7 +83,6 @@ def summarize_case(case, result):
         "notes": " ".join(notes) if notes else "OK",
     }
 
-
 def main():
     results = []
     summaries = []
@@ -126,7 +125,6 @@ def main():
             handle.write("\n\n")
 
     print(f"Full evaluation written to {OUTPUT_FILE}")
-
 
 if __name__ == "__main__":
     main()
