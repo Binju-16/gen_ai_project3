@@ -21,7 +21,7 @@ Students often struggle to understand complex course concepts quickly because an
 - `data/fallback_dictionary.json`: Local fallback data used when a live dictionary API lookup is unavailable.
 - `data/course_notes.json`: Local course notes used by the `search_course_notes` tool to find relevant study material.
 - `scripts/run_evaluation.py`: A test harness script that evaluates the app using real study-style questions and saves results to `evaluation.md`.
-- `app.py` contains the AI orchestration logic and tool definitions for `lookup_dictionary_entry` and `search_course_notes`, allowing the model to request supporting data when needed.
+- `app.py` contains the AI orchestration logic and tool definitions for `lookup_term`, `search_course_notes`, and `build_study_plan`, allowing the model to request supporting data when needed.
 
 ## How it works
 
@@ -29,16 +29,21 @@ MentorMate uses a small set of tools to provide more accurate answers. When a us
 
 ## Tools available
 
-Tool name: `lookup_dictionary_entry`
+Tool name: `lookup_term`
 
 - Description: Fetches a precise definition, example usage, and explanation for a technical term.
-- Input schema: `word` (string, required), `language` (string, default: English).
+- Input schema: `term` (string, required), `language` (string, default: English).
 - Execution: first attempts a live dictionary lookup, then falls back to local definitions if needed.
 
 Tool name: `search_course_notes`
 
 - Description: Searches local course notes for explanations, examples, or context related to the question.
 - Input schema: `query` (string, required), `max_results` (integer, default: 3).
+
+Tool name: `build_study_plan`
+
+- Description: Creates a structured study plan based on topics, deadlines, and available study hours.
+- Input schema: `topics` (array of strings, required), `deadline` (string, required), `available_hours` (integer, default: 2).
 
 ## Setup
 
@@ -120,8 +125,8 @@ This app can be deployed either as the original FastAPI backend or as the Stream
 ## What changed from draft to this version
 
 - Added a public-facing web UI with a chat-style experience.
-- Implemented two MCP tools and an agent loop in `app.py`.
-- Added `search_course_notes` for course-specific grounding and `lookup_dictionary_entry` for definitions.
+- Implemented three MCP tools and an agent loop in `app.py`.
+- Added `search_course_notes` for course-specific grounding, `lookup_term` for definitions, and `build_study_plan` for scheduling.
 - Included prompt engineering rationale, grounded tool execution, and a build log.
 - Added fallback data for more reliable dictionary responses.
 - Added a test harness script for evaluation and a dedicated `evaluation.md` output.

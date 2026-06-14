@@ -29,52 +29,76 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 SYSTEM_PROMPT = {
     "role": "system",
     "content": (
-        "You are MentorMate, an AI study assistant designed to help students understand course material clearly and efficiently. "
-        "Use the available tools only when they help you answer the user's question with grounded supporting data. "
-        "If the user asks for a definition, use the dictionary tool. If the user asks for course-specific examples or explanations, use the notes search tool. "
-        "When a tool returns data, incorporate it into your answer and make it explicit which supporting sources you used. "
-        "Do not call tools for general conversation or unrelated questions. "
-        "Keep your answers helpful, concise, and focused on the user's study goal."
+        "You are MentorMate, a study companion for students working with course material. "
+        "Answer general questions directly when you can, and use tools only for grounded course references, verified term definitions, or structured study plans. "
+        "Do not call tools for basic conceptual questions that can be answered from your knowledge. "
+        "If a tool is needed, choose the best one, use its result, and mention the source in a concise way. "
+        "If a tool returns no useful data, still provide a helpful answer for the user. "
+        "Keep your answers clear, practical, and focused on the user's study goal."
     ),
 }
 
 TOOL_DEFINITIONS = [
     {
-        "name": "lookup_dictionary_entry",
-        "description": "Fetch a precise definition, example usage, and explanation for a study term or concept.",
+        "name": "lookup_term",
+        "description": "Lookup a term in a trusted glossary or fallback dictionary when the user asks for a precise definition.",
         "parameters": {
             "type": "object",
             "properties": {
-                "word": {
+                "term": {
                     "type": "string",
-                    "description": "A course term or technical concept to look up.",
+                    "description": "The study term or concept to define.",
                 },
                 "language": {
                     "type": "string",
-                    "description": "The language of the lookup. Use English for this application.",
+                    "description": "The language for the definition lookup. Use English.",
                     "default": "English",
                 },
             },
-            "required": ["word"],
+            "required": ["term"],
         },
     },
     {
         "name": "search_course_notes",
-        "description": "Search local course notes and study guidance for relevant explanations or examples.",
+        "description": "Search local course notes for the user's specific class topics and examples.",
         "parameters": {
             "type": "object",
             "properties": {
                 "query": {
                     "type": "string",
-                    "description": "The topic, concept, or question to search for in course notes.",
+                    "description": "The course topic or concept to search for in notes.",
                 },
                 "max_results": {
                     "type": "integer",
-                    "description": "The maximum number of note matches to return.",
+                    "description": "The maximum number of matching notes to return.",
                     "default": 3,
                 },
             },
             "required": ["query"],
+        },
+    },
+    {
+        "name": "build_study_plan",
+        "description": "Create a structured study plan based on topics, deadlines, and available study hours.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "topics": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "A list of topics or concepts the student needs to study.",
+                },
+                "deadline": {
+                    "type": "string",
+                    "description": "The deadline or exam date for the study plan.",
+                },
+                "available_hours": {
+                    "type": "integer",
+                    "description": "Estimated study hours available per day.",
+                    "default": 2,
+                },
+            },
+            "required": ["topics", "deadline"],
         },
     },
 ]
@@ -119,16 +143,16 @@ def format_api_dictionary_result(raw_data: Any) -> Dict[str, Any]:
     return {"source": "dictionaryapi.dev", "entries": entries}
 
 
-async def lookup_dictionary_entry(word: str, language: str = "English") -> Dict[str, Any]:
+async def lookup_term(term: str, language: str = "English") -> Dict[str, Any]:
     language = language.strip().lower()
     if language != "english":
         return {
-            "word": word,
+            "term": term,
             "source": "fallback",
             "error": f"Only English lookup is supported. Received language={language}.",
         }
 
-    api_url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{word}"
+    api_url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{term}"
     async with httpx.AsyncClient(timeout=10.0) as client:
         try:
             response = await client.get(api_url)
@@ -137,14 +161,38 @@ async def lookup_dictionary_entry(word: str, language: str = "English") -> Dict[
             return format_api_dictionary_result(raw_data)
         except Exception:
             fallback = load_fallback_dictionary()
-            entry = fallback.get(word.lower())
+            entry = fallback.get(term.lower())
             if entry:
                 return {"source": "fallback", "entries": [entry]}
             return {
-                "word": word,
+                "term": term,
                 "source": "none",
                 "error": "Definition unavailable in the live dictionary API and the fallback dictionary.",
             }
+
+
+async def build_study_plan(topics: list[str], deadline: str, available_hours: int = 2) -> Dict[str, Any]:
+    plan = []
+    if not topics:
+        return {"error": "No study topics were provided."}
+
+    for index, topic in enumerate(topics, start=1):
+        plan.append(
+            {
+                "session": index,
+                "topic": topic,
+                "recommendation": f"Review {topic} with focused notes and examples, then test your recall with a short summary.",
+                "estimated_hours": min(available_hours, 2),
+            }
+        )
+
+    return {
+        "deadline": deadline,
+        "available_hours": available_hours,
+        "topics": topics,
+        "plan": plan,
+        "summary": f"Build a study plan for {len(topics)} topic(s) before {deadline} with about {available_hours} hours per day.",
+    }
 
 
 def load_course_notes() -> Dict[str, Any]:
@@ -175,8 +223,9 @@ async def search_course_notes(query: str, max_results: int = 3) -> Dict[str, Any
 
 
 TOOL_HANDLERS = {
-    "lookup_dictionary_entry": lookup_dictionary_entry,
+    "lookup_term": lookup_term,
     "search_course_notes": search_course_notes,
+    "build_study_plan": build_study_plan,
 }
 
 
@@ -194,22 +243,11 @@ async def call_openai_chat(messages: list[dict]) -> dict:
     return response
 
 
-@app.get("/", response_class=HTMLResponse)
-async def root(request: Request) -> HTMLResponse:
-    return templates.TemplateResponse("index.html", {"request": request})
-
-
-@app.post("/api/chat")
-async def chat_api(request: Request) -> JSONResponse:
-    payload = await request.json()
-    user_message = payload.get("message", "").strip()
-    if not user_message:
-        raise HTTPException(status_code=400, detail="Message text is required.")
-
+async def process_user_message(user_message: str) -> Dict[str, Any]:
     messages = [SYSTEM_PROMPT, {"role": "user", "content": user_message}]
     tool_trace = []
 
-    for _ in range(3):
+    for _ in range(5):
         response = await call_openai_chat(messages)
         choice = response.choices[0]
         message = choice.message
@@ -249,6 +287,22 @@ async def chat_api(request: Request) -> JSONResponse:
             continue
 
         assistant_content = message.content or ""
-        return JSONResponse({"answer": assistant_content, "tool_trace": tool_trace})
+        return {"answer": assistant_content, "tool_trace": tool_trace}
 
-    raise HTTPException(status_code=500, detail="Tool loop exceeded the maximum number of iterations.")
+    return {"answer": "I could not complete the request after multiple steps.", "tool_trace": tool_trace}
+
+
+@app.get("/", response_class=HTMLResponse)
+async def root(request: Request) -> HTMLResponse:
+    return templates.TemplateResponse("index.html", {"request": request})
+
+
+@app.post("/api/chat")
+async def chat_api(request: Request) -> JSONResponse:
+    payload = await request.json()
+    user_message = payload.get("message", "").strip()
+    if not user_message:
+        raise HTTPException(status_code=400, detail="Message text is required.")
+
+    result = await process_user_message(user_message)
+    return JSONResponse(result)

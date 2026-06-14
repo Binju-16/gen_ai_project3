@@ -2,7 +2,10 @@ import json
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
 import openai
+
+load_dotenv()
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 OUTPUT_FILE = BASE_DIR / "evaluation.md"
@@ -13,14 +16,14 @@ if not openai.api_key:
 
 TOOL_DEFINITIONS = [
     {
-        "name": "lookup_dictionary_entry",
+        "name": "lookup_term",
         "description": "Fetch a definition, example usage, and explanation for a study term or concept.",
         "parameters": {
             "type": "object",
             "properties": {
-                "word": {
+                "term": {
                     "type": "string",
-                    "description": "The word or concept to look up.",
+                    "description": "The term or concept to look up.",
                 },
                 "language": {
                     "type": "string",
@@ -28,7 +31,7 @@ TOOL_DEFINITIONS = [
                     "default": "English",
                 },
             },
-            "required": ["word"],
+            "required": ["term"],
         },
     },
     {
@@ -48,6 +51,30 @@ TOOL_DEFINITIONS = [
                 },
             },
             "required": ["query"],
+        },
+    },
+    {
+        "name": "build_study_plan",
+        "description": "Create a study plan for the user based on topics, deadlines, and available time.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "topics": {
+                    "type": "array",
+                    "items": {"type": "string"},
+                    "description": "Topics or concepts the student should study.",
+                },
+                "deadline": {
+                    "type": "string",
+                    "description": "The exam date or deadline for the study plan.",
+                },
+                "available_hours": {
+                    "type": "integer",
+                    "description": "Estimated study hours available per day.",
+                    "default": 2,
+                },
+            },
+            "required": ["topics", "deadline"],
         },
     },
 ]

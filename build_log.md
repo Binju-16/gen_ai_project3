@@ -32,9 +32,10 @@
 
 ## Tool design
 
-- Created `lookup_dictionary_entry` as the first MCP tool.
-- Defined the tool with a clear JSON schema for `word` and `language`.
+- Created `lookup_term` as the first MCP tool.
+- Defined the tool with a clear JSON schema for `term` and `language`.
 - Implemented execution with a live dictionary API and a fallback local dictionary.
+- Added `build_study_plan` for structured review schedules and more practical student support.
 
 ## Agent loop
 
