@@ -130,7 +130,11 @@ def main():
     st.sidebar.write(
         "Enter a question or concept and click **Ask**. The app can call a definition tool or a course notes search tool when appropriate."
     )
-    st.sidebar.write("Ensure `OPENAI_API_KEY` is set in your environment before running this app.")
+    api_key_set = bool(os.getenv("OPENAI_API_KEY"))
+    if api_key_set:
+        st.sidebar.success("OPENAI_API_KEY is configured. The app is ready to call the model.")
+    else:
+        st.sidebar.warning("OPENAI_API_KEY is not set. Set it before running this app.")
 
     user_input = st.text_area("Your study question", height=160)
     submit = st.button("Ask StudySense")
