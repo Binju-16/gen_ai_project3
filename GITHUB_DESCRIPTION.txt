@@ -1,8 +1,0 @@
-MentorMate is an AI study companion that helps students understand course concepts with grounded, helpful explanations. It integrates lecture notes and terminology lookups into an AI workflow so answers feel reliable and relevant.
-
-Key features:
-- Streamlit interface for student questions.
-- Definition lookup and course note search tools.
-- Grounded responses that combine model reasoning with supporting data.
-- Local fallback definitions and notes for consistent answers.
-- Evaluation scripts for realistic study questions and result tracking.
