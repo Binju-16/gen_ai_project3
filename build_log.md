@@ -57,3 +57,33 @@
 - Add more grounding data for course-specific terms.
 - Expand the UI with better state tracking and session history.
 - Add evaluation metrics for accuracy and tool call reliability.
+
+## Engineering challenges and fixes
+
+### OpenAI SDK serialization issue
+
+**Problem:**  
+The evaluation script failed because OpenAI response objects could not be written directly to JSON.
+
+**Investigation:**  
+The newer OpenAI SDK returns structured response objects instead of plain dictionaries.
+
+**Solution:**  
+Updated `run_full_evaluation.py` to safely convert response objects using `raw_message.to_dict()` before writing evaluation output.
+
+**Result:**  
+The evaluation script regenerated `evaluation.md` successfully without serialization errors.
+
+### Environment variable setup
+
+**Problem:**  
+The app could not call OpenAI because `OPENAI_API_KEY` was missing.
+
+**Investigation:**  
+The project expected the key from the environment, but no `.env` file existed locally.
+
+**Solution:**  
+Added `python-dotenv`, created `.env`, and loaded environment variables with `load_dotenv()`.
+
+**Result:**  
+The app can now load the API key locally while keeping secrets out of GitHub.

@@ -6,6 +6,10 @@ MentorMate is an AI study companion for students who need fast, grounded answers
 
 Students often struggle to understand complex course concepts quickly because answers from generic AI systems are vague or ungrounded. MentorMate solves this by combining course notes and reliable definitions with an AI model that decides when to use supporting tools behind the scenes.
 
+## Why MentorMate is different
+
+MentorMate is not just a general chatbot. It uses an agentic workflow where the model decides whether it needs a definition, course-note context, or a study plan before answering. This makes the response more useful for students because answers are grounded in either course notes, dictionary data, or structured planning logic instead of only relying on model memory.
+
 ## Target user
 
 - University students studying generative AI or related coursework.
@@ -73,14 +77,6 @@ streamlit run streamlit_app.py
 uvicorn app:app --reload
 ```
 
-## Recommended commit messages
-Use the following commit messages as a guide when saving your work:
-
-- `feat: add Streamlit front-end and interactive study UI`
-- `feat: implement MCP tools and tool dispatch`
-- `docs: update README with Streamlit setup and project architecture`
-- `test: add evaluation harness and sample model cases`
-- `chore: add commit guidance and GitHub description`
 
 7. Open the Streamlit app in your browser at the URL shown by Streamlit.
 
@@ -137,8 +133,4 @@ This app can be deployed either as the original FastAPI backend or as the Stream
 - The tool currently supports English dictionary lookups only.
 - The frontend is intentionally minimal for rapid iteration.
 
-## Next steps for final submission
 
-- Add a second tool for concept search or study-plan generation.
-- Expand grounding with course-specific notes or focused study examples.
-- Include structured evaluation metrics and test cases in the final write-up.

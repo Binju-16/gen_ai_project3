@@ -30,6 +30,15 @@
 
 ---
 
+## Evaluation metrics
+
+- Total tests executed: 8
+- Tests passed: 8
+- Pass rate: 100%
+- Tool selection accuracy: 8/8
+- Tool execution success: 8/8
+- Grounding success: 8/8
+
 ## Define grounding
 
 **Input:** Define grounding for my course study and explain why it matters.
