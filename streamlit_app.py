@@ -1,9 +1,16 @@
 import asyncio
 import os
+import sys
+from pathlib import Path
 
 from dotenv import load_dotenv
 import streamlit as st
 
+ROOT_DIR = Path(__file__).resolve().parent
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
+import app
 from app import process_user_message
 
 # Load environment variables from .env file
@@ -99,8 +106,8 @@ def main():
                     st.write(result.get("answer", ""))
                     trace = result.get("tool_trace", [])
                     if trace:
-                        with st.expander("Supporting data for this answer"):
-                            render_tool_results(trace)
+                        st.write("**Supporting data for this answer**")
+                        render_tool_results(trace)
                     st.markdown("---")
                 except Exception as e:
                     st.error(f"{title} failed: {e}")
