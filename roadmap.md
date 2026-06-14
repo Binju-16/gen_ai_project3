@@ -1,5 +1,9 @@
 # Project 3 Roadmap
 
+## Current implementation
+
+The current MentorMate implementation uses a Streamlit front end with an agent loop in `app.py`. It supports three tools: `lookup_term`, `search_course_notes`, and `build_study_plan`. Evaluation is performed with `scripts/run_full_evaluation.py`, which writes output to `evaluation.md`.
+
 ## 1. Project context
 
 This Project 3 draft is the capstone for the Generative AI course. It should combine prompt engineering, grounding, evaluation, and agentic architecture from earlier projects while shifting focus to production-quality delivery and real-world impact.

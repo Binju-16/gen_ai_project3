@@ -120,7 +120,7 @@ This app can be deployed either as the original FastAPI backend or as the Stream
 - Use real study questions to test whether MentorMate answers correctly.
 - Measure usefulness by checking whether responses include supporting data and relevant course context.
 - Track tool usage only when it improves the answer.
-- Run `python3 scripts/run_evaluation.py` to generate `evaluation.md` with actual user-style queries.
+- Run `python3 scripts/run_full_evaluation.py` to generate `evaluation.md` from the latest app logic.
 
 ## What changed from draft to this version
 
