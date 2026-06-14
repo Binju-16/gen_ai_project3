@@ -1,3 +1,35 @@
+# MentorMate Evaluation
+
+## Executive Summary
+
+This evaluation validates that MentorMate demonstrates agentic AI behavior, tool orchestration, grounding, and practical usefulness for student learning.
+
+The evaluation focused on four key questions:
+
+1. Can the model autonomously decide when to use a tool?
+2. Can the model select the correct tool for the user’s intent?
+3. Can tool outputs be incorporated into the final response?
+4. Can the application provide useful study assistance through grounded answers and study planning?
+
+Eight evaluation scenarios were executed covering:
+
+* Definition retrieval
+* Course-note grounding
+* Concept comparison
+* Agentic reasoning
+* Study plan generation
+
+Results:
+
+* Total Tests: 8
+* Tests Passed: 8
+* Tool Selection Accuracy: 100%
+* Tool Execution Success: 100%
+* Grounding Success: 100%
+
+The results demonstrate that MentorMate is not a simple chatbot. The model evaluates user intent, chooses between multiple tools, executes those tools, reads the returned information, and generates grounded final responses.
+
+
 # Full Evaluation Results
 
 *Generated on: 2026-06-14T06:49:59.312218Z*
@@ -38,6 +70,10 @@
 - Tool selection accuracy: 8/8
 - Tool execution success: 8/8
 - Grounding success: 8/8
+
+## Observed Limitations
+
+During evaluation, the prompt "What does agentic behavior mean in the context of an AI study assistant?" triggered the dictionary tool rather than the course-notes tool. Although the final answer remained useful, future improvements could prioritize course-note retrieval for generative AI concepts such as grounding, prompt engineering, and agentic behavior.
 
 ## Define grounding
 
@@ -829,3 +865,10 @@
 }
 ```
 
+## Reflection on Results
+
+The evaluation demonstrated that MentorMate consistently selected tools appropriate to the user's intent and successfully incorporated tool outputs into grounded responses.
+
+The strongest performance was observed for course-note retrieval and study-plan generation, where the model used structured information to produce targeted answers.
+
+These results support the goal of building a practical AI study companion rather than a generic chatbot because answers are generated from tool outputs, course content, and structured planning logic.

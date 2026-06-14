@@ -52,11 +52,27 @@
   - "Explain the term prompt engineering."
 - Verified the tool trace in the UI to confirm actual tool invocation.
 
-## What to improve next
+## Major Design Decisions
 
-- Add more grounding data for course-specific terms.
-- Expand the UI with better state tracking and session history.
-- Add evaluation metrics for accuracy and tool call reliability.
+### Why I Chose a Study Assistant
+
+As a graduate student, I regularly use AI tools to learn new concepts, review coursework, and prepare for exams. While many AI tools can answer questions, they often provide generic explanations that are not connected to course material. I wanted to build a study assistant that could combine grounded information, structured study planning, and autonomous tool usage in a single application.
+
+### Why Grounding Was Important
+
+One of the main goals of MentorMate was to reduce reliance on model memory alone. By grounding answers in course notes and external definitions, the assistant can provide responses that are more accurate, transparent, and useful for learning.
+
+### Why Multiple Tools Were Added
+
+The first version only supported term lookup. During development I realized that definitions alone were not enough for real student use cases. Students also need explanations connected to course content and help organizing study time. This led to the addition of the `search_course_notes` and `build_study_plan` tools.
+
+
+## Future Improvements
+
+- Expand course-note coverage for additional AI concepts.
+- Improve retrieval quality for domain-specific terminology.
+- Add conversation history and session memory.
+- Support multiple courses and subject areas.
 
 ## Engineering challenges and fixes
 
@@ -87,3 +103,9 @@ Added `python-dotenv`, created `.env`, and loaded environment variables with `lo
 
 **Result:**  
 The app can now load the API key locally while keeping secrets out of GitHub.
+
+## Reflection
+
+This project changed my understanding of generative AI systems. Initially I viewed AI assistants primarily as prompt-and-response applications. Through this project I learned that effective AI products require much more than prompting. They require system design, tool orchestration, grounding, evaluation, and user experience considerations.
+
+The final MentorMate system demonstrates how an LLM can autonomously choose tools, retrieve supporting information, and generate grounded responses. The project also reinforced the importance of evaluation because a system that appears to work can still reveal weaknesses when tested against realistic scenarios.

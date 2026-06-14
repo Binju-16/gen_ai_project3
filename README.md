@@ -6,6 +6,13 @@ MentorMate is an AI study companion for students who need fast, grounded answers
 
 Students often struggle to understand complex course concepts quickly because answers from generic AI systems are vague or ungrounded. MentorMate solves this by combining course notes and reliable definitions with an AI model that decides when to use supporting tools behind the scenes.
 
+## Why I Built This
+
+As a graduate student in Data Science, I frequently use AI tools to learn new concepts, review coursework, and prepare for exams. While many AI assistants can answer questions, they often provide generic explanations that are not connected to course material or study goals.
+
+I built MentorMate to explore how an AI system could become a more effective learning companion by combining grounded course notes, reliable concept definitions, and structured study planning. The goal was not simply to answer questions, but to help students learn more effectively through transparent and grounded responses.
+
+
 ## Why MentorMate is different
 
 MentorMate is not just a general chatbot. It uses an agentic workflow where the model decides whether it needs a definition, course-note context, or a study plan before answering. This makes the response more useful for students because answers are grounded in either course notes, dictionary data, or structured planning logic instead of only relying on model memory.
@@ -27,9 +34,48 @@ MentorMate is not just a general chatbot. It uses an agentic workflow where the 
 - `scripts/run_evaluation.py`: A test harness script that evaluates the app using real study-style questions and saves results to `evaluation.md`.
 - `app.py` contains the AI orchestration logic and tool definitions for `lookup_term`, `search_course_notes`, and `build_study_plan`, allowing the model to request supporting data when needed.
 
+## Agentic Workflow
+
+```text
+User Question
+      ↓
+Streamlit Interface
+      ↓
+OpenAI Agent
+      ↓
+Tool Decision
+ ┌───────────────┬───────────────────┬─────────────────┐
+ │ lookup_term   │ search_course_notes │ build_study_plan │
+ └───────────────┴───────────────────┴─────────────────┘
+      ↓
+Tool Output
+      ↓
+Grounded Response
+      ↓
+Student
+```
+
+The model decides whether a tool is needed, selects the appropriate tool, reads the returned information, and then generates a grounded final response.
+
+
 ## How it works
 
 MentorMate uses a small set of tools to provide more accurate answers. When a user asks a question, the AI decides if it needs a definition or a note lookup, then requests the appropriate tool. This keeps the response grounded and study-ready.
+
+## Key Design Decisions
+
+### Why Multiple Tools?
+
+A single definition tool was not sufficient for realistic student workflows. Students often need both conceptual explanations and practical study guidance. This led to the addition of course-note retrieval and study-plan generation.
+
+### Why Grounding?
+
+Grounding improves reliability by providing information that the model cannot infer from pretraining alone. Course notes and tool outputs help reduce generic responses and improve educational usefulness.
+
+### Why Streamlit?
+
+Streamlit provided a simple way to build and deploy an interactive interface while allowing users to inspect tool traces and understand how answers were generated.
+
 
 ## Tools available
 
@@ -111,12 +157,12 @@ This app can be deployed either as the original FastAPI backend or as the Stream
 - The tool returns supporting information.
 - The final answer combines the model's explanation with grounded data.
 
-## Evaluation plan
+## Evaluation Results
 
-- Use real study questions to test whether MentorMate answers correctly.
-- Measure usefulness by checking whether responses include supporting data and relevant course context.
-- Track tool usage only when it improves the answer.
-- Run `python3 scripts/run_full_evaluation.py` to generate `evaluation.md` from the latest app logic.
+- Evaluated using 8 study-oriented test cases.
+- Verified autonomous tool selection across definition lookup, note retrieval, and study planning scenarios.
+- Achieved 100% tool execution success across evaluation cases.
+- Tool traces and grounded outputs are documented in `evaluation.md`.
 
 ## What changed from draft to this version
 
@@ -131,6 +177,15 @@ This app can be deployed either as the original FastAPI backend or as the Stream
 
 - Requires an OpenAI API key.
 - The tool currently supports English dictionary lookups only.
-- The frontend is intentionally minimal for rapid iteration.
+- The application currently focuses on generative AI coursework and is not optimized for other academic domains.
+- Dictionary-based lookups may not always contain specialized AI terminology.
+- The system does not currently maintain long-term conversation memory across sessions.
 
 
+## Live Application
+
+Deployment URL:
+
+https://your-app.streamlit.app
+
+The deployed application allows users to interact with MentorMate through the Streamlit interface and observe tool traces generated during agent execution.
