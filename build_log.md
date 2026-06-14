@@ -1,4 +1,4 @@
-# StudySense Build Log
+# MentorMate Build Log
 
 ## Initial idea
 

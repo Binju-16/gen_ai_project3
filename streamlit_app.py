@@ -40,13 +40,13 @@ def run_study_sense(user_message: str):
 
     for _ in range(3):
         response = run_async(call_openai_chat(messages))
-        choice = response["choices"][0]
-        message = choice["message"]
-        function_call = message.get("function_call")
+        choice = response.choices[0]
+        message = choice.message
+        function_call = message.function_call
 
         if function_call:
-            tool_name = function_call["name"]
-            raw_args = function_call.get("arguments", "{}")
+            tool_name = function_call.name
+            raw_args = function_call.arguments or "{}"
             try:
                 args = json.loads(raw_args)
             except json.JSONDecodeError:
@@ -87,25 +87,25 @@ def run_study_sense(user_message: str):
             
             # Call the model WITHOUT the `functions` parameter to get final grounded answer
             import openai
-            second_resp = openai.ChatCompletion.create(
+            second_resp = openai.chat.completions.create(
                 model="gpt-4-0613",
                 messages=messages,
                 temperature=0.2,
             )
-            second_choice = second_resp["choices"][0]["message"]
-            final_answer = second_choice.get("content", "")
+            second_choice = second_resp.choices[0].message
+            final_answer = second_choice.content or ""
             return final_answer, tool_trace, second_choice
 
-        return message.get("content", ""), tool_trace, choice
+        return message.content or "", tool_trace, choice
 
     raise RuntimeError("Tool loop exceeded the maximum number of iterations.")
 
 
 # Predefined test prompts useful for quick local evaluation and debugging
 SAMPLE_PROMPTS = [
-    ("Definition request", "Explain agentic behavior in AI and when I should use a tool."),
-    ("Course grounding request", "What is grounding and why does it matter for this project?"),
-    ("Combined study question", "Define mocking in testing and find course guidance on evaluation."),
+    ("Definition lookup", "What is the difference between prompt engineering and fine-tuning in generative AI?"),
+    ("Course concept explanation", "Explain how grounding improves the reliability of AI study answers."),
+    ("Study planning", "How should I prepare for a generative AI exam using lecture notes and definitions?"),
 ]
 
 
@@ -119,25 +119,25 @@ def display_tool_trace(tool_trace):
 
 
 def main():
-    st.set_page_config(page_title="StudySense AI Companion", page_icon="📚")
-    st.title("StudySense — Streamlit AI Study Companion")
+    st.set_page_config(page_title="MentorMate AI Companion", page_icon="📚")
+    st.title("MentorMate — AI Study Companion")
     st.write(
-        "Ask a study question about generative AI, coursework concepts, or definitions, and StudySense will decide whether to use a grounded tool to answer it."
+        "Get fast, grounded answers to your course questions using lecture notes and reliable definitions. Ask about a concept, assignment topic, or study plan and MentorMate will use supporting data to answer clearly."
     )
     st.markdown("---")
 
     st.sidebar.header("How to use")
     st.sidebar.write(
-        "Enter a question or concept and click **Ask**. The app can call a definition tool or a course notes search tool when appropriate."
+        "Ask a course-related question, request a summary, or look up a term. MentorMate will decide whether it needs supporting data from notes or a definition source."
     )
     api_key_set = bool(os.getenv("OPENAI_API_KEY"))
     if api_key_set:
-        st.sidebar.success("OPENAI_API_KEY is configured. The app is ready to call the model.")
+        st.sidebar.success("OPENAI_API_KEY is configured. The app is ready to answer questions.")
     else:
         st.sidebar.warning("OPENAI_API_KEY is not set. Set it before running this app.")
 
-    user_input = st.text_area("Your study question", height=160)
-    submit = st.button("Ask StudySense")
+    user_input = st.text_area("Your question", height=160)
+    submit = st.button("Ask MentorMate")
 
     if submit:
         if not user_input.strip():
@@ -151,31 +151,27 @@ def main():
                 st.write(answer)
 
                 if tool_trace:
-                    st.markdown("### Tool trace")
-                    display_tool_trace(tool_trace)
-
-                if choice.get("function_call"):
-                    st.markdown("### Final decision")
-                    st.json(choice["function_call"])
+                    with st.expander("Supporting data used for this response"):
+                        display_tool_trace(tool_trace)
             except Exception as exc:
                 st.error(str(exc))
 
     st.markdown("---")
     st.subheader("Quick tests")
 
-    with st.expander("Run sample prompts and validate tool dispatch"):
-        st.write("Use these canned prompts to verify the model calls tools and returns grounded answers.")
-        if st.button("Run sample prompts"):
+    with st.expander("Example study questions"):
+        st.write("Try these real course questions to see how MentorMate uses notes and definitions.")
+        if st.button("Run example questions"):
             for title, prompt in SAMPLE_PROMPTS:
                 st.markdown(f"**{title}**")
-                st.write(f"Prompt: {prompt}")
+                st.write(f"Question: {prompt}")
                 try:
                     ans, trace, choice = run_study_sense(prompt)
                     st.markdown("**Answer**")
                     st.write(ans)
                     if trace:
-                        st.markdown("**Tool trace**")
-                        display_tool_trace(trace)
+                        with st.expander("Supporting data for this answer"):
+                            display_tool_trace(trace)
                     st.markdown("---")
                 except Exception as e:
                     st.error(f"{title} failed: {e}")

@@ -56,31 +56,31 @@ PROMPT = [
     {
         "role": "system",
         "content": (
-            "You are StudySense, an autonomous study assistant. You may use the available tools when the user needs a definition, concept explanation, or course-specific grounding. "
-            "Return tool calls only when appropriate."
+            "You are MentorMate, an AI study companion. Use tools only when they help you answer the student's question accurately with supporting definitions or course notes. "
+            "If you use a tool, refer to the information it returns in your final answer."
         ),
     }
 ]
 
 TEST_CASES = [
     {
-        "name": "Definition request",
-        "input": "Explain agentic behavior in AI and when I should use a tool.",
+        "name": "Concept comparison",
+        "input": "What is the difference between prompt engineering and fine-tuning in generative AI?",
     },
     {
-        "name": "Course grounding request",
-        "input": "What is grounding and why does it matter for this project?",
+        "name": "Course concept explanation",
+        "input": "Summarize how grounding helps make AI answers more reliable.",
     },
     {
-        "name": "Combined study question",
-        "input": "Define mocking in testing and find course guidance on evaluation.",
+        "name": "Exam preparation",
+        "input": "How should I prepare for a generative AI exam using lecture notes and definitions?",
     },
 ]
 
 
 def run_test_case(case):
     messages = PROMPT + [{"role": "user", "content": case["input"]}]
-    response = openai.ChatCompletion.create(
+    response = openai.chat.completions.create(
         model="gpt-4-0613",
         messages=messages,
         functions=TOOL_DEFINITIONS,
@@ -94,7 +94,7 @@ def main():
     results = []
     for case in TEST_CASES:
         response = run_test_case(case)
-        choice = response["choices"][0]["message"]
+        choice = response.choices[0].message
         results.append({
             "name": case["name"],
             "input": case["input"],
@@ -109,7 +109,7 @@ def main():
             handle.write(f"**Input:** {result['input']}\n\n")
             handle.write("**Model response:**\n\n```")
             handle.write("\n")
-            handle.write(json.dumps(result['message'], indent=2))
+            handle.write(json.dumps(result['message'].to_dict(), indent=2))
             handle.write("\n```")
             handle.write("\n\n")
     print(f"Evaluation results written to {OUTPUT_FILE}")

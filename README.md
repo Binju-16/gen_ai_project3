@@ -1,16 +1,16 @@
-# StudySense — Project 3 AI Study Companion
+# MentorMate — AI Study Companion
 
-StudySense is a capstone app for the Generative AI course built around an interactive Streamlit interface. It combines a custom MCP tool workflow, agentic decision making, prompt engineering, grounding, and live study support for course concepts.
+MentorMate is an AI study companion for students who need fast, grounded answers to course questions. It helps learners understand technical concepts, find relevant course material, and prepare more effectively for assignments and exams.
 
 ## Problem statement
 
-Students often need quick, reliable concept explanations and examples while studying generative AI and related technical topics. StudySense solves this by letting a learner ask questions directly and triggering a live dictionary lookup tool when the model decides it needs grounded definitions.
+Students often struggle to understand complex course concepts quickly because answers from generic AI systems are vague or ungrounded. MentorMate solves this by combining course notes and reliable definitions with an AI model that decides when to use supporting tools behind the scenes.
 
 ## Target user
 
-- Undergraduate or graduate students studying generative AI.
-- Learners who need a simple deployed assistant to explain technical terms, show examples, and guide study decisions.
-- Instructors or graders who want to evaluate an agentic system with visible tool usage.
+- University students studying generative AI or related coursework.
+- Learners who want explanations grounded in lecture notes and accurate terminology.
+- Students preparing for exams, assignments, or concept reviews who need a quick study assistant.
 
 ## System architecture
 
@@ -18,27 +18,27 @@ Students often need quick, reliable concept explanations and examples while stud
 - `streamlit_app.py`: Streamlit front-end for interactive study sessions and tool tracing.
 - `templates/index.html`: Simple fallback web frontend allowing users to ask questions.
 - `static/style.css`: UI styling.
-- `data/fallback_dictionary.json`: Local fallback data used when the live dictionary API is unavailable.
-- `data/course_notes.json`: Local course notes used by the `search_course_notes` tool for domain grounding.
-- `scripts/run_evaluation.py`: A test harness script that executes sample prompts against the LLM and saves results to `evaluation.md`.
-- `app.py` contains MCP tool definitions for `lookup_dictionary_entry` and `search_course_notes`, plus an agent loop that:
-  1. sends the user request to the LLM,
-  2. detects whether the model wants to call a tool,
-  3. executes that tool if requested,
-  4. returns the result to the model,
-  5. continues until the model produces a final answer.
+- `data/fallback_dictionary.json`: Local fallback data used when a live dictionary API lookup is unavailable.
+- `data/course_notes.json`: Local course notes used by the `search_course_notes` tool to find relevant study material.
+- `scripts/run_evaluation.py`: A test harness script that evaluates the app using real study-style questions and saves results to `evaluation.md`.
+- `app.py` contains the AI orchestration logic and tool definitions for `lookup_dictionary_entry` and `search_course_notes`, allowing the model to request supporting data when needed.
 
-## Agentic behavior
+## How it works
 
-StudySense is agentic because the model decides whether to call the `lookup_dictionary_entry` tool. The Python backend does not hardcode the decision path. Instead, it exposes the tool and executes it only when the model returns a tool call.
+MentorMate uses a small set of tools to provide more accurate answers. When a user asks a question, the AI decides if it needs a definition or a note lookup, then requests the appropriate tool. This keeps the response grounded and study-ready.
 
-## MCP tool
+## Tools available
 
 Tool name: `lookup_dictionary_entry`
 
-- Description: Fetches a definition, example usage, and explanation for a study term or concept.
+- Description: Fetches a precise definition, example usage, and explanation for a technical term.
 - Input schema: `word` (string, required), `language` (string, default: English).
-- Execution: either live dictionary data from `dictionaryapi.dev` or fallback local data.
+- Execution: first attempts a live dictionary lookup, then falls back to local definitions if needed.
+
+Tool name: `search_course_notes`
+
+- Description: Searches local course notes for explanations, examples, or context related to the question.
+- Input schema: `query` (string, required), `max_results` (integer, default: 3).
 
 ## Setup
 
@@ -105,18 +105,17 @@ This app can be deployed either as the original FastAPI backend or as the Stream
 
 ## Example interaction
 
-- User: `What does agentic behavior mean in an AI system?`
-- Model may choose to call the tool with `word=agentic`
-- Tool returns the definition and examples
-- Model returns a grounded answer referencing the live lookup result
+- User: `What is the difference between prompt engineering and fine-tuning?`
+- The model may decide to search course notes or look up a precise definition.
+- The tool returns supporting information.
+- The final answer combines the model's explanation with grounded data.
 
 ## Evaluation plan
 
-- Use test prompts that ask for definitions, course grounding, or study guidance.
-- Confirm that the model selects a tool and that the tool call is visible in the tool trace.
-- Verify that the final answer is coherent and grounded in the returned data.
-- Run `python3 scripts/run_evaluation.py` to generate `evaluation.md` with live model outputs.
-- Document failures and iterate on prompt wording.
+- Use real study questions to test whether MentorMate answers correctly.
+- Measure usefulness by checking whether responses include supporting data and relevant course context.
+- Track tool usage only when it improves the answer.
+- Run `python3 scripts/run_evaluation.py` to generate `evaluation.md` with actual user-style queries.
 
 ## What changed from draft to this version
 
@@ -136,5 +135,5 @@ This app can be deployed either as the original FastAPI backend or as the Stream
 ## Next steps for final submission
 
 - Add a second tool for concept search or study-plan generation.
-- Expand grounding with course-specific notes or rubric-aware examples.
+- Expand grounding with course-specific notes or focused study examples.
 - Include structured evaluation metrics and test cases in the final write-up.

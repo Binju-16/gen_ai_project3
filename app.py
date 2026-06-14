@@ -22,32 +22,32 @@ openai.api_key = os.getenv("OPENAI_API_KEY", "")
 if not openai.api_key:
     print("WARNING: OPENAI_API_KEY is not set. The app will not be able to call the OpenAI API until you set this environment variable.")
 
-app = FastAPI(title="StudySense AI Companion")
+app = FastAPI(title="MentorMate AI Companion")
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
 templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 SYSTEM_PROMPT = {
     "role": "system",
     "content": (
-        "You are StudySense, an autonomous study assistant for learners. "
-        "You have two tools available. Use lookup_dictionary_entry whenever the user asks for a definition, concept explanation, or example usage of a technical term. "
-        "Use search_course_notes when the user asks for course-specific guidance, concept grounding, study advice, or context about generative AI topics. "
-        "Do not call a tool for general conversation. When you call a tool, return only JSON arguments in the function call. "
-        "When the tool returns data, read it carefully and use it to ground your final answer. "
-        "Be concise, helpful, and study-focused."
+        "You are MentorMate, an AI study assistant designed to help students understand course material clearly and efficiently. "
+        "Use the available tools only when they help you answer the user's question with grounded supporting data. "
+        "If the user asks for a definition, use the dictionary tool. If the user asks for course-specific examples or explanations, use the notes search tool. "
+        "When a tool returns data, incorporate it into your answer and make it explicit which supporting sources you used. "
+        "Do not call tools for general conversation or unrelated questions. "
+        "Keep your answers helpful, concise, and focused on the user's study goal."
     ),
 }
 
 TOOL_DEFINITIONS = [
     {
         "name": "lookup_dictionary_entry",
-        "description": "Fetch a definition, example usage, and explanation for a study term or concept.",
+        "description": "Fetch a precise definition, example usage, and explanation for a study term or concept.",
         "parameters": {
             "type": "object",
             "properties": {
                 "word": {
                     "type": "string",
-                    "description": "The word or concept to look up.",
+                    "description": "A course term or technical concept to look up.",
                 },
                 "language": {
                     "type": "string",
@@ -60,17 +60,17 @@ TOOL_DEFINITIONS = [
     },
     {
         "name": "search_course_notes",
-        "description": "Search local course notes and study guidance for generative AI topics and coursework concepts.",
+        "description": "Search local course notes and study guidance for relevant explanations or examples.",
         "parameters": {
             "type": "object",
             "properties": {
                 "query": {
                     "type": "string",
-                    "description": "The course concept, topic, or study guidance to search for.",
+                    "description": "The topic, concept, or question to search for in course notes.",
                 },
                 "max_results": {
                     "type": "integer",
-                    "description": "The maximum number of matching notes to return.",
+                    "description": "The maximum number of note matches to return.",
                     "default": 3,
                 },
             },
@@ -174,11 +174,17 @@ async def search_course_notes(query: str, max_results: int = 3) -> Dict[str, Any
     }
 
 
+TOOL_HANDLERS = {
+    "lookup_dictionary_entry": lookup_dictionary_entry,
+    "search_course_notes": search_course_notes,
+}
+
+
 async def call_openai_chat(messages: list[dict]) -> dict:
     if not openai.api_key:
         raise RuntimeError("OPENAI_API_KEY is not configured.")
 
-    response = openai.ChatCompletion.create(
+    response = openai.chat.completions.create(
         model="gpt-4-0613",
         messages=messages,
         functions=TOOL_DEFINITIONS,
@@ -205,27 +211,21 @@ async def chat_api(request: Request) -> JSONResponse:
 
     for _ in range(3):
         response = await call_openai_chat(messages)
-        choice = response["choices"][0]
-        message = choice["message"]
+        choice = response.choices[0]
+        message = choice.message
 
-        function_call = message.get("function_call")
+        function_call = message.function_call
         if function_call:
-            tool_name = function_call["name"]
-            raw_args = function_call.get("arguments", "{}")
+            tool_name = function_call.name
+            raw_args = function_call.arguments or "{}"
             try:
                 args = json.loads(raw_args)
             except json.JSONDecodeError:
                 args = {}
 
-            if tool_name == "lookup_dictionary_entry":
-                tool_result = await lookup_dictionary_entry(
-                    word=args.get("word", ""), language=args.get("language", "English")
-                )
-            elif tool_name == "search_course_notes":
-                tool_result = await search_course_notes(
-                    query=args.get("query", ""),
-                    max_results=int(args.get("max_results", 3)),
-                )
+            tool_func = TOOL_HANDLERS.get(tool_name)
+            if tool_func:
+                tool_result = await tool_func(**args)
             else:
                 tool_result = {"error": f"Unknown tool: {tool_name}"}
 
@@ -242,14 +242,13 @@ async def chat_api(request: Request) -> JSONResponse:
             )
             messages.append(
                 {
-                    "role": "tool",
-                    "name": tool_name,
-                    "content": json.dumps(tool_result),
+                    "role": "assistant",
+                    "content": json.dumps({"tool": tool_name, "result": tool_result}),
                 }
             )
             continue
 
-        assistant_content = message.get("content", "")
+        assistant_content = message.content or ""
         return JSONResponse({"answer": assistant_content, "tool_trace": tool_trace})
 
     raise HTTPException(status_code=500, detail="Tool loop exceeded the maximum number of iterations.")

@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>StudySense AI Companion</title>
+  <title>MentorMate AI Companion</title>
   <link rel="stylesheet" href="/static/style.css" />
 </head>
 <body>
   <div class="app-shell">
     <header>
-      <h1>StudySense</h1>
-      <p>Your agentic study assistant with a live dictionary lookup tool.</p>
+      <h1>MentorMate</h1>
+      <p>Your AI study companion for grounded course explanations and reliable definitions.</p>
     </header>
 
     <main>
@@ -19,13 +19,13 @@
       </section>
 
       <section class="input-panel">
-        <textarea id="user-input" placeholder="Ask a study question or request a definition..."></textarea>
+        <textarea id="user-input" placeholder="Ask a course question or request a concept explanation..."></textarea>
         <button id="send-button">Send</button>
       </section>
     </main>
 
     <footer>
-      <p>Built for Project 3: one custom MCP tool + autonomous model decisions.</p>
+      <p>MentorMate helps students get grounded answers with supporting source data.</p>
     </footer>
   </div>
 
@@ -37,7 +37,7 @@
     function addMessage(role, text) {
       const messageEl = document.createElement('div');
       messageEl.className = 'chat-message ' + role;
-      messageEl.innerHTML = `<strong>${role === 'user' ? 'You' : 'StudySense'}:</strong> ${text}`;
+      messageEl.innerHTML = `<strong>${role === 'user' ? 'You' : 'MentorMate'}:</strong> ${text}`;
       chatLog.appendChild(messageEl);
       chatLog.scrollTop = chatLog.scrollHeight;
     }
