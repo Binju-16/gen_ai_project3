@@ -3,6 +3,7 @@ import os
 import sys
 from pathlib import Path
 import asyncio
+from datetime import datetime
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(BASE_DIR))
@@ -39,6 +40,12 @@ def main():
 
     with open(OUTPUT_FILE, "w", encoding="utf-8") as handle:
         handle.write("# Full Evaluation Results\n\n")
+        handle.write(f"*Generated on: {datetime.utcnow().isoformat()}Z*\n\n")
+        handle.write("## Evaluated questions\n\n")
+        for case in TEST_CASES:
+            handle.write(f"- {case['name']}: {case['input']}\n")
+        handle.write("\n---\n\n")
+
         for r in results:
             handle.write(f"## {r['name']}\n\n")
             handle.write(f"**Input:** {r['input']}\n\n")
