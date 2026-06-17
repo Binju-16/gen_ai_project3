@@ -3,7 +3,7 @@
 ## Initial idea
 
 - Build an AI study assistant that can explain technical terms and concepts.
-- The core requirement would be a custom MCP tool for grounded lookup.
+- The core requirement was to build a custom tool for grounded term lookup and demonstrate autonomous tool usage.
 
 ## Prompt engineering experiments
 
@@ -32,7 +32,7 @@
 
 ## Tool design
 
-- Created `lookup_term` as the first MCP tool.
+- Created `lookup_term` as the first custom tool used for grounded term definitions.
 - Defined the tool with a clear JSON schema for `term` and `language`.
 - Implemented execution with a live dictionary API and a fallback local dictionary.
 - Added `build_study_plan` for structured review schedules and more practical student support.
@@ -103,6 +103,33 @@ Added `python-dotenv`, created `.env`, and loaded environment variables with `lo
 
 **Result:**  
 The app can now load the API key locally while keeping secrets out of GitHub.
+
+## Project Evolution
+
+### Stage 1: Basic Study Assistant
+
+The project began as a simple study assistant that answered questions about course concepts. At this stage, the system behaved similarly to a standard chatbot and relied primarily on model knowledge.
+
+### Stage 2: Introducing Tool Usage
+
+After reviewing the project requirements, I realized the application needed to demonstrate autonomous tool use. I created the `lookup_term` tool and modified the prompt so the model could decide when a definition lookup was needed.
+
+### Stage 3: Improving Grounding
+
+While testing the application, I noticed that many course-related questions required information beyond standard dictionary definitions. To improve grounding, I added the `search_course_notes` tool and connected the application to local course notes. This allowed the model to provide answers that were more relevant to coursework and exam preparation.
+
+### Stage 4: Expanding Student Support
+
+Definitions and note retrieval alone were not sufficient for practical study scenarios. To support students preparing for assignments and exams, I implemented the `build_study_plan` tool, allowing the model to generate structured study schedules based on topics and deadlines.
+
+### Stage 5: Evaluation and User Experience
+
+Once the core functionality was working, I focused on evaluation and usability. I created evaluation scripts to test tool selection and grounding behavior, fixed serialization issues in evaluation outputs, and improved fallback handling so users would receive helpful answers even when a tool could not find relevant information.
+
+### Final Version
+
+The final MentorMate system combines prompt engineering, grounding, tool orchestration, evaluation, and a deployed Streamlit interface. The application can autonomously select tools, retrieve supporting information, generate study plans, and provide grounded responses for students.
+
 
 ## Reflection
 
