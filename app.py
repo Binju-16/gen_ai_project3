@@ -20,7 +20,7 @@ COURSE_NOTES_FILE = DATA_DIR / "course_notes.json"
 
 openai.api_key = os.getenv("OPENAI_API_KEY", "")
 if not openai.api_key:
-    print("WARNING: OPENAI_API_KEY is not set. The app will not be able to call the OpenAI API until you set this environment variable.")
+    print("WARNING: OPENAI_API_KEY is not set.")
 
 app = FastAPI(title="MentorMate AI Companion")
 app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="static")
@@ -29,21 +29,24 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 SYSTEM_PROMPT = {
     "role": "system",
     "content": (
-        "You are MentorMate, an agentic study companion for students in a generative AI course. "
-        "When the user asks for a definition or explanation of a term, call the lookup_term tool and base your answer on its result. "
-        "When the user asks for course-specific examples, note summaries, or grounded context, call search_course_notes and use the returned notes explicitly. "
-        "When the user asks for a study schedule or exam preparation plan, call build_study_plan with topics, deadline, and available_hours. "
-        "Only answer directly when the question is purely conceptual and does not require a definition, grounding, or planning tool. "
-        "Choose the best tool, decide whether another tool is needed, and stop once the user has a complete study-focused response. "
-        "If a tool returns no useful data, still give a helpful answer and explain the limitation clearly. "
-        "Always mention the source of grounding in the final answer and avoid hallucinations."
+        "You are MentorMate, an agentic study companion for students. "
+        "Use tools when they help the user: lookup_term for definitions, "
+        "search_course_notes for course-specific context, and build_study_plan for study schedules. "
+        "The model decides whether a tool is needed and which tool to use. "
+        "When a tool returns useful information, use it to ground your answer. "
+        "If a tool returns found=false, no matches, no useful data, or an error, do not apologize, "
+        "do not mention tool failure, and do not expose internal tool behavior. "
+        "Never say 'the lookup tool did not find', 'tool failed', or 'dictionary unavailable'. "
+        "Instead, give the best clear, student-friendly explanation you can. "
+        "If grounding was used, briefly mention the source. If grounding was not available, answer naturally without discussing the failed lookup. "
+        "Keep answers concise, helpful, and study-focused."
     ),
 }
 
 TOOL_DEFINITIONS = [
     {
         "name": "lookup_term",
-        "description": "Lookup a term in a trusted glossary or fallback dictionary when the user asks for a precise definition.",
+        "description": "Look up a term in a dictionary or fallback glossary when the user asks for a precise definition.",
         "parameters": {
             "type": "object",
             "properties": {
@@ -62,17 +65,17 @@ TOOL_DEFINITIONS = [
     },
     {
         "name": "search_course_notes",
-        "description": "Search local course notes for the user's specific class topics and examples.",
+        "description": "Search local course notes for class topics, examples, and grounded course context.",
         "parameters": {
             "type": "object",
             "properties": {
                 "query": {
                     "type": "string",
-                    "description": "The course topic or concept to search for in notes.",
+                    "description": "The course topic or concept to search for.",
                 },
                 "max_results": {
                     "type": "integer",
-                    "description": "The maximum number of matching notes to return.",
+                    "description": "Maximum number of matching notes to return.",
                     "default": 3,
                 },
             },
@@ -88,11 +91,11 @@ TOOL_DEFINITIONS = [
                 "topics": {
                     "type": "array",
                     "items": {"type": "string"},
-                    "description": "A list of topics or concepts the student needs to study.",
+                    "description": "Topics the student needs to study.",
                 },
                 "deadline": {
                     "type": "string",
-                    "description": "The deadline or exam date for the study plan.",
+                    "description": "Deadline or exam date.",
                 },
                 "available_hours": {
                     "type": "integer",
@@ -115,9 +118,13 @@ def load_fallback_dictionary() -> Dict[str, Any]:
 
 def format_api_dictionary_result(raw_data: Any) -> Dict[str, Any]:
     entries = []
+
     for item in raw_data:
         word = item.get("word")
-        phonetics = ", ".join([p.get("text", "") for p in item.get("phonetics", []) if p.get("text")])
+        phonetics = ", ".join(
+            [p.get("text", "") for p in item.get("phonetics", []) if p.get("text")]
+        )
+
         meanings = []
         for meaning in item.get("meanings", []):
             definitions = []
@@ -129,12 +136,14 @@ def format_api_dictionary_result(raw_data: Any) -> Dict[str, Any]:
                         "synonyms": definition.get("synonyms", []),
                     }
                 )
+
             meanings.append(
                 {
                     "part_of_speech": meaning.get("partOfSpeech"),
                     "definitions": definitions,
                 }
             )
+
         entries.append(
             {
                 "word": word,
@@ -142,19 +151,28 @@ def format_api_dictionary_result(raw_data: Any) -> Dict[str, Any]:
                 "meanings": meanings,
             }
         )
-    return {"source": "dictionaryapi.dev", "entries": entries}
+
+    return {
+        "found": True,
+        "source": "dictionaryapi.dev",
+        "entries": entries,
+    }
 
 
 async def lookup_term(term: str, language: str = "English") -> Dict[str, Any]:
     language = language.strip().lower()
+    cleaned_term = term.strip()
+
     if language != "english":
         return {
-            "term": term,
-            "source": "fallback",
-            "error": f"Only English lookup is supported. Received language={language}.",
+            "term": cleaned_term,
+            "source": "none",
+            "found": False,
+            "message": "Only English lookup is supported.",
         }
 
-    api_url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{term}"
+    api_url = f"https://api.dictionaryapi.dev/api/v2/entries/en/{cleaned_term}"
+
     async with httpx.AsyncClient(timeout=10.0) as client:
         try:
             response = await client.get(api_url)
@@ -163,38 +181,21 @@ async def lookup_term(term: str, language: str = "English") -> Dict[str, Any]:
             return format_api_dictionary_result(raw_data)
         except Exception:
             fallback = load_fallback_dictionary()
-            entry = fallback.get(term.lower())
+            entry = fallback.get(cleaned_term.lower())
+
             if entry:
-                return {"source": "fallback", "entries": [entry]}
+                return {
+                    "found": True,
+                    "source": "fallback",
+                    "entries": [entry],
+                }
+
             return {
-                "term": term,
+                "term": cleaned_term,
                 "source": "none",
-                "error": "Definition unavailable in the live dictionary API and the fallback dictionary.",
+                "found": False,
+                "message": "No dictionary definition was found.",
             }
-
-
-async def build_study_plan(topics: list[str], deadline: str, available_hours: int = 2) -> Dict[str, Any]:
-    plan = []
-    if not topics:
-        return {"error": "No study topics were provided."}
-
-    for index, topic in enumerate(topics, start=1):
-        plan.append(
-            {
-                "session": index,
-                "topic": topic,
-                "recommendation": f"Review {topic} with focused notes and examples, then test your recall with a short summary.",
-                "estimated_hours": min(available_hours, 2),
-            }
-        )
-
-    return {
-        "deadline": deadline,
-        "available_hours": available_hours,
-        "topics": topics,
-        "plan": plan,
-        "summary": f"Build a study plan for {len(topics)} topic(s) before {deadline} with about {available_hours} hours per day.",
-    }
 
 
 def load_course_notes() -> Dict[str, Any]:
@@ -208,19 +209,56 @@ async def search_course_notes(query: str, max_results: int = 3) -> Dict[str, Any
     query = query.strip().lower()
     notes = load_course_notes().get("notes", [])
     matches = []
+
     for note in notes:
         title = note.get("topic", "").lower()
         content = note.get("content", "").lower()
+
         if query in title or query in content:
             matches.append(note)
-
-    if not matches:
-        matches = notes[:max_results]
 
     return {
         "query": query,
         "source": "course_notes",
+        "found": len(matches) > 0,
         "matches": matches[:max_results],
+    }
+
+
+async def build_study_plan(
+    topics: list[str], deadline: str, available_hours: int = 2
+) -> Dict[str, Any]:
+    if not topics:
+        return {
+            "found": False,
+            "message": "No study topics were provided.",
+        }
+
+    plan = []
+    for index, topic in enumerate(topics, start=1):
+        plan.append(
+            {
+                "session": index,
+                "topic": topic,
+                "recommendation": (
+                    f"Review {topic} with focused notes and examples, "
+                    "then test your recall with a short summary."
+                ),
+                "estimated_hours": min(available_hours, 2),
+            }
+        )
+
+    return {
+        "found": True,
+        "source": "study_plan_builder",
+        "deadline": deadline,
+        "available_hours": available_hours,
+        "topics": topics,
+        "plan": plan,
+        "summary": (
+            f"Build a study plan for {len(topics)} topic(s) before {deadline} "
+            f"with about {available_hours} hours per day."
+        ),
     }
 
 
@@ -231,7 +269,7 @@ TOOL_HANDLERS = {
 }
 
 
-async def call_openai_chat(messages: list[dict]) -> dict:
+async def call_openai_chat(messages: list[dict]) -> Any:
     if not openai.api_key:
         raise RuntimeError("OPENAI_API_KEY is not configured.")
 
@@ -242,6 +280,7 @@ async def call_openai_chat(messages: list[dict]) -> dict:
         function_call="auto",
         temperature=0.2,
     )
+
     return response
 
 
@@ -255,21 +294,43 @@ async def process_user_message(user_message: str) -> Dict[str, Any]:
         message = choice.message
 
         function_call = message.function_call
+
         if function_call:
             tool_name = function_call.name
             raw_args = function_call.arguments or "{}"
+
             try:
                 args = json.loads(raw_args)
             except json.JSONDecodeError:
                 args = {}
 
             tool_func = TOOL_HANDLERS.get(tool_name)
-            if tool_func:
-                tool_result = await tool_func(**args)
-            else:
-                tool_result = {"error": f"Unknown tool: {tool_name}"}
 
-            tool_trace.append({"tool": tool_name, "args": args, "result": tool_result})
+            if tool_func:
+                try:
+                    tool_result = await tool_func(**args)
+                except Exception as exc:
+                    tool_result = {
+                        "found": False,
+                        "source": "none",
+                        "message": "The tool could not return usable data.",
+                        "debug_error": str(exc),
+                    }
+            else:
+                tool_result = {
+                    "found": False,
+                    "source": "none",
+                    "message": f"Unknown tool: {tool_name}",
+                }
+
+            tool_trace.append(
+                {
+                    "tool": tool_name,
+                    "args": args,
+                    "result": tool_result,
+                }
+            )
+
             messages.append(
                 {
                     "role": "assistant",
@@ -280,18 +341,30 @@ async def process_user_message(user_message: str) -> Dict[str, Any]:
                     },
                 }
             )
+
             messages.append(
                 {
-                    "role": "assistant",
-                    "content": json.dumps({"tool": tool_name, "result": tool_result}),
+                    "role": "function",
+                    "name": tool_name,
+                    "content": json.dumps(tool_result),
                 }
             )
+
             continue
 
         assistant_content = message.content or ""
-        return {"answer": assistant_content, "tool_trace": tool_trace}
+        return {
+            "answer": assistant_content,
+            "tool_trace": tool_trace,
+        }
 
-    return {"answer": "I could not complete the request after multiple steps.", "tool_trace": tool_trace}
+    return {
+        "answer": (
+            "I could not complete the full tool workflow, but I can still help. "
+            "Please try rephrasing your question."
+        ),
+        "tool_trace": tool_trace,
+    }
 
 
 @app.get("/", response_class=HTMLResponse)
@@ -303,6 +376,7 @@ async def root(request: Request) -> HTMLResponse:
 async def chat_api(request: Request) -> JSONResponse:
     payload = await request.json()
     user_message = payload.get("message", "").strip()
+
     if not user_message:
         raise HTTPException(status_code=400, detail="Message text is required.")
 
