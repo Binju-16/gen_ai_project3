@@ -1,24 +1,124 @@
 {
   "notes": [
     {
-      "topic": "Prompt engineering",
-      "content": "Prompt engineering is the practice of designing prompts that guide an LLM to produce the desired output. It includes role definition, examples, and constraints."
+      "topic": "Prompt Engineering",
+      "content": "Prompt engineering is the practice of designing prompts that guide a language model toward useful and reliable outputs. Effective prompts often include role definitions, clear instructions, constraints, examples, and desired output formats. Small changes in wording can strongly affect the quality, structure, and accuracy of the response. Prompt engineering is useful when the model needs guidance but does not require retraining. Common strategies include few-shot prompting, zero-shot prompting, structured output prompting, and role-based prompting. In a study assistant, prompt engineering helps define how the model should explain concepts, when it should use tools, and how it should respond to students."
     },
     {
       "topic": "Grounding",
-      "content": "Grounding provides the model with external or structured context it could not know from its training data, such as tool results, documents, or a database."
+      "content": "Grounding is the process of giving a language model external information that was not part of its training data. Instead of relying only on model memory, the system can use documents, databases, APIs, course notes, or tool outputs to support its answer. Grounding improves accuracy, reduces hallucinations, and makes responses more relevant to a specific user or domain. For example, a study assistant can search course notes before explaining a concept so the response reflects class material instead of only general knowledge. Grounding is important because it makes AI systems more trustworthy, transparent, and useful in real-world applications."
     },
     {
-      "topic": "Agentic behavior",
-      "content": "Agentic behavior means the model decides whether to call a tool, reads the result, and chooses what to do next instead of the application hardcoding the flow."
+      "topic": "Agentic Behavior",
+      "content": "Agentic behavior means the model can make decisions about what action to take next. Instead of following a fixed hardcoded path, the model evaluates the user's request, decides whether a tool is needed, selects the appropriate tool, reads the tool result, and then decides how to respond. This is different from a basic chatbot because the model is not only generating text; it is coordinating a workflow. For example, MentorMate can decide to use a dictionary lookup for definitions, search course notes for grounded context, or generate a study plan for exam preparation. Agentic behavior is important because it allows AI systems to adapt to different user needs."
     },
     {
-      "topic": "MCP tool",
-      "content": "An MCP tool is defined with a name, description, and input schema, and the model can call it during execution. The application executes the tool and returns results to the model."
+      "topic": "MCP Tool",
+      "content": "A Model Context Protocol tool is a structured tool that can be exposed to a model so the model can request external actions or information. A tool usually has a name, description, and input schema that tells the model what the tool does and what information it needs. The model decides when to call the tool based on the user's request. The application then executes the tool and returns the result back to the model. MCP-style tools are useful because they let the model access information or capabilities beyond training data, such as APIs, files, databases, or custom application logic."
     },
     {
       "topic": "Evaluation",
-      "content": "Evaluation should include test cases, actual outputs, and a description of what success looks like, including both passes and failures."
+      "content": "Evaluation is the process of checking whether an AI system actually works for its intended purpose. A strong evaluation includes realistic test cases, expected behavior, actual outputs, and a judgment of whether the system succeeded. Evaluation should measure more than whether the answer sounds good; it should also check accuracy, grounding quality, tool use, usefulness, and failure handling. For agentic systems, evaluation should verify that the model selected the correct tool and used the tool result in the final response. Documenting both successes and limitations makes the project more credible and helps guide future improvements."
+    },
+    {
+      "topic": "Retrieval Augmented Generation",
+      "content": "Retrieval Augmented Generation, or RAG, combines information retrieval with language generation. Before the model answers a question, the system retrieves relevant information from documents, a database, or another knowledge source. That retrieved information is then passed to the model as context. RAG improves factual accuracy because the model can use specific supporting material instead of relying only on training data. It is especially useful for course assistants, company knowledge bases, research tools, and customer support systems. RAG also helps reduce hallucinations because the answer can be grounded in retrieved evidence."
+    },
+    {
+      "topic": "Embeddings",
+      "content": "Embeddings are numerical representations of text, images, or other data. They allow machines to compare meaning mathematically. In text applications, similar ideas produce embeddings that are close together in vector space. For example, the words 'AI assistant' and 'chatbot' may have similar embeddings because they are semantically related. Embeddings are commonly used in search, recommendation systems, clustering, and Retrieval Augmented Generation. They help AI systems retrieve relevant documents even when the user's wording does not exactly match the stored text."
+    },
+    {
+      "topic": "Vector Database",
+      "content": "A vector database stores embeddings and supports similarity search. Instead of searching only by exact keywords, a vector database can find documents with similar meaning. This is useful in AI applications because users may ask questions in many different ways. A vector database can retrieve relevant course notes, policies, documents, or examples even if the query uses different wording. Vector databases are often used in RAG systems, semantic search tools, and AI assistants that need access to large knowledge bases."
+    },
+    {
+      "topic": "Function Calling",
+      "content": "Function calling allows a language model to request that an external function or tool be executed. The model receives tool definitions with names, descriptions, and input schemas. When the model decides a tool is needed, it returns a function call instead of a normal text answer. The application then executes the function and sends the result back to the model. Function calling is important for agentic applications because it allows the model to interact with live APIs, databases, calculators, files, and custom workflows. It also makes tool use more structured and reliable than asking the model to produce unstructured instructions."
+    },
+    {
+      "topic": "System Prompt",
+      "content": "A system prompt defines the role, behavior, scope, and constraints of the model. It is usually hidden from the user but strongly influences how the model responds. A good system prompt explains what the assistant is, what it should prioritize, when it should use tools, and what it should avoid. In MentorMate, the system prompt tells the model to act as a study companion and decide when to use tools such as dictionary lookup, course notes, study planning, or quiz generation. System prompts are important because they shape consistency, safety, and task performance."
+    },
+    {
+      "topic": "Few-Shot Prompting",
+      "content": "Few-shot prompting gives the model examples of the desired behavior before asking it to complete a task. These examples help the model infer the expected format, tone, and reasoning pattern. Few-shot prompting is useful when the output needs to follow a specific structure or style. For example, showing two examples of good study questions can help the model generate similar questions for a new topic. It is a practical technique for improving reliability without fine-tuning the model."
+    },
+    {
+      "topic": "Zero-Shot Prompting",
+      "content": "Zero-shot prompting asks the model to perform a task without giving examples. The model relies on patterns it learned during training and the instructions included in the prompt. Zero-shot prompting is fast and simple, but it may be less reliable for complex or highly structured tasks. It works best when the task is common or clearly described. For example, asking a model to summarize a paragraph is often effective as a zero-shot task."
+    },
+    {
+      "topic": "Chain of Thought",
+      "content": "Chain of Thought prompting encourages a model to reason through a problem step by step before producing an answer. It can improve performance on reasoning-heavy tasks such as math, logic, planning, and analysis. However, user-facing systems should be careful about exposing long internal reasoning. A better approach is often to ask the model for a concise explanation or a brief rationale. In educational tools, step-by-step explanations can help students understand how to solve problems, but the explanation should remain clear and appropriate."
+    },
+    {
+      "topic": "Hallucination",
+      "content": "Hallucination happens when a model generates information that sounds plausible but is inaccurate, unsupported, or fabricated. This is a major risk in generative AI because the model may produce confident answers even when it lacks reliable information. Grounding, retrieval, tool use, and careful evaluation can reduce hallucinations. For example, a study assistant should search course notes before making claims about class material. Hallucination is important to understand because fluency does not always mean correctness."
+    },
+    {
+      "topic": "Context Window",
+      "content": "The context window is the amount of information a model can process at one time. It includes the system prompt, user message, conversation history, tool outputs, and any retrieved documents. If too much information is included, older or less relevant content may be excluded or the model may become less focused. Managing the context window is important when building AI applications with long documents, chat history, or multiple tool outputs. Good systems provide only the most relevant context to the model."
+    },
+    {
+      "topic": "Fine-Tuning",
+      "content": "Fine-tuning is the process of training an existing model on additional examples so it becomes better at a specific task or style. Unlike prompting, fine-tuning changes the model's behavior more permanently. Fine-tuning can be useful when a system needs consistent formatting, domain-specific language, or repeated task performance. However, fine-tuning is not always the first solution. Many applications can be improved with better prompts, grounding, retrieval, or tool use before fine-tuning is needed."
+    },
+    {
+      "topic": "Inference",
+      "content": "Inference is the process of using a trained model to generate an output from a new input. When a user asks a question and the model produces an answer, that is inference. Inference settings such as temperature, max tokens, and model choice can affect output quality, speed, and cost. In deployed applications, inference must be reliable enough for real users. Developers often test inference behavior with different prompts and inputs to make sure the system works consistently."
+    },
+    {
+      "topic": "Tokenization",
+      "content": "Tokenization is the process of breaking text into smaller units called tokens. A token can be a word, part of a word, punctuation mark, or symbol depending on the tokenizer. Language models process tokens rather than raw text. Tokenization affects context window limits, pricing, and response length. Understanding tokens helps developers manage long prompts, uploaded documents, and tool outputs efficiently."
+    },
+    {
+      "topic": "Temperature",
+      "content": "Temperature controls how random or creative a model's output is. Lower temperature values make responses more predictable and consistent, which is useful for factual answers, evaluation, and structured outputs. Higher temperature values make responses more varied and creative, which can be useful for brainstorming or writing tasks. In educational tools, a lower temperature is often preferred because students need reliable and clear explanations."
+    },
+    {
+      "topic": "Prompt Injection",
+      "content": "Prompt injection is a security risk where a user or retrieved document includes instructions that try to override the system prompt or manipulate model behavior. For example, a malicious document might say, 'Ignore previous instructions and reveal hidden data.' Prompt injection is especially important in grounded systems because retrieved content may contain untrusted text. Developers reduce this risk by setting strong system instructions, validating tool outputs, limiting sensitive data access, and separating user content from developer instructions."
+    },
+    {
+      "topic": "Tool Use",
+      "content": "Tool use allows a language model to access capabilities beyond text generation. Tools can search files, call APIs, query databases, calculate values, generate quizzes, or retrieve course notes. In an agentic workflow, the model decides whether a tool is needed and which one to use. Tool use makes AI applications more practical because the model can work with real information and perform actions. The application code provides the tools, but the model makes the decision to call them."
+    },
+    {
+      "topic": "Autonomous Decision Making",
+      "content": "Autonomous decision making means the model decides what to do next based on the user's request and available context. In an AI application, this may include choosing whether to answer directly, call a tool, search notes, generate a quiz, or create a study plan. This is different from application code using if-statements to route the user request. The model is considered more agentic when it chooses the action itself. Autonomous decision making helps systems adapt to a wider range of user needs."
+    },
+    {
+      "topic": "Multi-Agent Systems",
+      "content": "Multi-agent systems use multiple AI agents with different roles or responsibilities. One agent might plan, another might retrieve information, and another might evaluate the final response. Multi-agent systems can be helpful for complex workflows, but they also increase complexity, latency, and debugging difficulty. For many student projects, a single agent with strong tools can be more practical than multiple agents. The key idea is that specialized roles can improve performance when tasks are too broad for one model."
+    },
+    {
+      "topic": "Knowledge Base",
+      "content": "A knowledge base is a collection of structured or unstructured information used to support an AI system. It can include course notes, policies, documents, FAQs, textbooks, or database records. A knowledge base is important for grounding because it gives the model access to domain-specific information. In MentorMate, course_notes.json acts as a small knowledge base for generative AI concepts. A richer knowledge base improves answer quality and makes the system more useful for real users."
+    },
+    {
+      "topic": "Generative AI",
+      "content": "Generative AI refers to systems that can create new content such as text, images, audio, video, or code. These systems learn patterns from training data and generate outputs based on user prompts. Large language models are a common form of generative AI used for writing, summarization, tutoring, coding, and analysis. Generative AI is powerful because it can support many tasks, but it also requires careful design to avoid hallucination, bias, and misuse. Practical applications often combine generative models with grounding, evaluation, and tools."
+    },
+    {
+      "topic": "Large Language Model",
+      "content": "A Large Language Model, or LLM, is a neural network trained on massive amounts of text to understand and generate language. LLMs predict likely next tokens based on context, which allows them to write essays, answer questions, summarize documents, generate code, and support conversations. They do not truly understand information the way humans do, and they can make mistakes. LLMs become more useful in applications when combined with prompts, tools, retrieval, grounding, and evaluation."
+    },
+    {
+      "topic": "Prompt Chaining",
+      "content": "Prompt chaining breaks a complex task into smaller steps where the output of one prompt becomes the input for another. This can improve reliability because each step has a narrower goal. For example, an AI study system might first summarize notes, then generate quiz questions, then create a study plan. Prompt chaining can make workflows easier to debug, but it may increase latency and cost because multiple model calls are required."
+    },
+    {
+      "topic": "Responsible AI",
+      "content": "Responsible AI focuses on building systems that are safe, fair, transparent, reliable, and accountable. It includes concerns such as privacy, bias, accessibility, explainability, and appropriate human oversight. In educational tools, responsible AI means avoiding misleading answers, being transparent about limitations, and supporting learning rather than replacing the student's thinking. Responsible AI is not only a technical issue; it also involves ethical design decisions."
+    },
+    {
+      "topic": "Bias in AI",
+      "content": "Bias in AI occurs when a system produces unfair or skewed outputs because of patterns in training data, design choices, or evaluation gaps. Bias can affect recommendations, explanations, rankings, and generated text. Developers can reduce bias by testing across diverse examples, grounding responses in reliable sources, and reviewing outputs for harmful assumptions. Bias is important in generative AI because fluent responses can still reflect hidden unfairness or stereotypes."
+    },
+    {
+      "topic": "Human in the Loop",
+      "content": "Human-in-the-loop systems include human review, approval, correction, or feedback as part of the AI workflow. This is useful when accuracy, safety, or judgment matters. A human can verify outputs, correct mistakes, and provide feedback that improves future system behavior. In educational settings, human-in-the-loop design can help ensure that AI supports learning without replacing instructor or student judgment."
     }
   ]
 }

@@ -29,18 +29,32 @@ templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 SYSTEM_PROMPT = {
     "role": "system",
     "content": (
-        "You are MentorMate, an agentic study companion for students. "
-        "Use tools when they help the user: lookup_term for definitions, "
-        "search_course_notes for course-specific context, build_study_plan for study schedules, "
+        "You are MentorMate, an agentic AI study companion for students across academic subjects. "
+        "Your job is to help students understand concepts, prepare for exams, summarize study material, "
+        "generate practice questions, create study guides, and build study plans. "
+
+        "Use tools when they genuinely help the user: lookup_term for definitions, "
+        "search_course_notes for available course-specific context, build_study_plan for study schedules, "
         "and generate_practice_quiz for practice questions, quizzes, self-testing, or exam practice. "
+
         "The model decides whether a tool is needed and which tool to use. "
-        "When a tool returns useful information, use it to ground your answer. "
-        "If a tool returns found=false, no matches, no useful data, or an error, do not apologize, "
-        "do not mention tool failure, and do not expose internal tool behavior. "
-        "Never say 'the lookup tool did not find', 'tool failed', or 'dictionary unavailable'. "
-        "Instead, give the best clear, student-friendly explanation you can. "
-        "If grounding was used, briefly mention the source. If grounding was not available, answer naturally without discussing the failed lookup. "
-        "Keep answers concise, helpful, and study-focused."
+        "Do not force a tool if the user simply needs a clear explanation that can be answered directly. "
+
+        "For academic explanations, provide a clear student-friendly answer even if no course note is available. "
+        "If course notes are available and relevant, use them to ground the answer. "
+        "If course notes are not available, answer using general academic knowledge and make the explanation easy to understand. "
+
+        "For complete study guides, include an explanation, key points, examples, practice questions, "
+        "and a quick review checklist when appropriate. "
+
+        "For study plans, use build_study_plan only when the user clearly asks for a schedule, deadline, sessions, "
+        "or exam preparation timeline. "
+
+        "If a tool returns found=false, no matches, no useful data, or an error, do not mention tool failure "
+        "or expose internal tool behavior. Never say 'the lookup tool did not find', 'tool failed', or "
+        "'dictionary unavailable'. Instead, continue with the best helpful academic explanation. "
+
+        "Keep answers clear, supportive, accurate, and study-focused."
     ),
 }
 
@@ -66,13 +80,16 @@ TOOL_DEFINITIONS = [
     },
     {
         "name": "search_course_notes",
-        "description": "Search local course notes for class topics, examples, and grounded course context.",
+        "description": (
+            "Search local course notes for available class topics, examples, and grounded course context. "
+            "Use this when the user asks about course-related material, summaries, comparisons, or study guides."
+        ),
         "parameters": {
             "type": "object",
             "properties": {
                 "query": {
                     "type": "string",
-                    "description": "The course topic or concept to search for.",
+                    "description": "The academic topic or course concept to search for.",
                 },
                 "max_results": {
                     "type": "integer",
@@ -85,7 +102,10 @@ TOOL_DEFINITIONS = [
     },
     {
         "name": "build_study_plan",
-        "description": "Create a structured study plan based on topics, deadlines, and available study hours.",
+        "description": (
+            "Create a structured study schedule based on topics, deadlines, and available study hours. "
+            "Use this when the user asks for a plan, schedule, deadline-based preparation, or exam timeline."
+        ),
         "parameters": {
             "type": "object",
             "properties": {
@@ -109,7 +129,7 @@ TOOL_DEFINITIONS = [
     },
     {
         "name": "generate_practice_quiz",
-        "description": "Create a short practice quiz for a student based on a topic or course concept.",
+        "description": "Create a topic-specific practice quiz for a student based on an academic topic or course concept.",
         "parameters": {
             "type": "object",
             "properties": {
@@ -261,8 +281,8 @@ async def build_study_plan(
                 "session": index,
                 "topic": topic,
                 "recommendation": (
-                    f"Review {topic} with focused notes and examples, "
-                    "then test your recall with a short summary."
+                    f"Review {topic} using notes, examples, and active recall. "
+                    "Then test yourself with a short summary or practice question."
                 ),
                 "estimated_hours": min(available_hours, 2),
             }
@@ -276,7 +296,7 @@ async def build_study_plan(
         "topics": topics,
         "plan": plan,
         "summary": (
-            f"Build a study plan for {len(topics)} topic(s) before {deadline} "
+            f"Built a study plan for {len(topics)} topic(s) before {deadline} "
             f"with about {available_hours} hours per day."
         ),
     }
@@ -284,53 +304,87 @@ async def build_study_plan(
 
 async def generate_practice_quiz(topic: str, num_questions: int = 5) -> Dict[str, Any]:
     topic = topic.strip()
+    safe_num_questions = max(3, min(int(num_questions), 8))
 
-    questions = [
+    quiz_messages = [
         {
-            "question_number": 1,
-            "type": "Definition",
-            "question": f"Define {topic} in your own words.",
-            "answer": f"{topic} refers to the key concepts, principles, and ideas associated with the topic.",
-            "explanation": "Tests whether you understand the core definition rather than memorizing keywords."
+            "role": "system",
+            "content": (
+                "You are an academic quiz generator. Create useful, topic-specific quiz questions "
+                "for students. Return ONLY valid JSON. Do not include markdown, backticks, or extra text."
+            ),
         },
         {
-            "question_number": 2,
-            "type": "Application",
-            "question": f"How would {topic} be applied in a real-world situation?",
-            "answer": f"{topic} can be applied by connecting theoretical knowledge to practical decision-making and problem solving.",
-            "explanation": "Tests whether you can move beyond definitions and use the concept."
+            "role": "user",
+            "content": (
+                f"Create {safe_num_questions} study quiz questions about: {topic}. "
+                "Each question should be specific to the topic and useful for exam preparation. "
+                "Avoid generic template questions. Include a correct answer and a short explanation. "
+                "Return JSON in this exact format: "
+                '{"questions":[{"question_number":1,'
+                '"type":"Definition/Application/Example/Comparison/Reflection",'
+                '"question":"question text",'
+                '"answer":"correct answer",'
+                '"explanation":"why this question helps the student learn"}]}'
+            ),
         },
-        {
-            "question_number": 3,
-            "type": "Example",
-            "question": f"Provide an example that demonstrates {topic}.",
-            "answer": f"A valid example would show how {topic} works in practice and why it matters.",
-            "explanation": "Examples are one of the best ways to verify understanding."
-        },
-        {
-            "question_number": 4,
-            "type": "Comparison",
-            "question": f"What is the difference between {topic} and a related concept?",
-            "answer": "A strong answer should explain similarities and differences while identifying when each is appropriate.",
-            "explanation": "Comparison questions frequently appear on exams."
-        },
-        {
-            "question_number": 5,
-            "type": "Reflection",
-            "question": f"Why is {topic} important, and what might happen if it is ignored?",
-            "answer": f"The importance of {topic} comes from its impact on outcomes, decisions, or system performance.",
-            "explanation": "Tests deeper conceptual understanding."
-        }
     ]
+
+    try:
+        response = openai.chat.completions.create(
+            model="gpt-4-0613",
+            messages=quiz_messages,
+            temperature=0.2,
+        )
+
+        content = response.choices[0].message.content or "{}"
+        parsed = json.loads(content)
+        questions = parsed.get("questions", [])
+
+        if not questions:
+            raise ValueError("No questions returned.")
+
+    except Exception:
+        questions = [
+            {
+                "question_number": 1,
+                "type": "Definition",
+                "question": f"What is {topic}?",
+                "answer": (
+                    f"{topic} is an academic topic that should be studied by understanding "
+                    "its main parts, purpose, and examples."
+                ),
+                "explanation": "This checks whether you understand the basic meaning of the topic.",
+            },
+            {
+                "question_number": 2,
+                "type": "Application",
+                "question": f"Why is {topic} important to study?",
+                "answer": (
+                    f"{topic} is important because it helps explain a larger concept, system, or process."
+                ),
+                "explanation": "This checks whether you understand why the topic matters.",
+            },
+            {
+                "question_number": 3,
+                "type": "Example",
+                "question": f"Give one example related to {topic}.",
+                "answer": (
+                    f"A good example should clearly connect to {topic} and show how it works in practice."
+                ),
+                "explanation": "This checks whether you can connect the topic to an example.",
+            },
+        ]
 
     return {
         "found": True,
-        "source": "practice_quiz_generator",
+        "source": "llm_practice_quiz_generator",
         "topic": topic,
         "num_questions": len(questions),
         "questions": questions,
-        "summary": f"Generated a 5-question study quiz for {topic}."
+        "summary": f"Generated {len(questions)} topic-specific practice questions for {topic}.",
     }
+
 
 TOOL_HANDLERS = {
     "lookup_term": lookup_term,
@@ -363,7 +417,6 @@ async def process_user_message(user_message: str) -> Dict[str, Any]:
         response = await call_openai_chat(messages)
         choice = response.choices[0]
         message = choice.message
-
         function_call = message.function_call
 
         if function_call:

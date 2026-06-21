@@ -32,12 +32,16 @@ def run_async(coro):
     return asyncio.run(coro)
 
 
-SAMPLE_PROMPTS = {
-    "Explain Concept": "Explain grounding in generative AI using a student-friendly example.",
-    "Summarize Notes": "Summarize the course notes on prompt engineering and explain why they matter.",
-    "Make Study Plan": "I have an exam in three days on prompt engineering, grounding, and agentic behavior. Create a focused study plan.",
-    "Practice Quiz": "Generate a practice quiz on grounding in generative AI.",
-    "Compare Concepts": "Compare prompt engineering and fine-tuning, and explain when each is useful.",
+HELP_MODES = {
+    "Explain": "Explain the following topic clearly for a student:",
+    "Summarize": "Summarize the following study material or topic for a student:",
+    "Study Plan": "Create a practical study plan for the following topic or exam goal:",
+    "Quiz Me": "Generate a useful practice quiz for the following topic:",
+    "Study Mode": (
+        "Create a complete study guide for the following topic. Include an explanation, "
+        "key points, examples, practice questions, and a quick revision checklist:"
+    ),
+    "Compare": "Compare the following concept with related concepts and explain the differences:",
 }
 
 
@@ -54,9 +58,9 @@ def tool_display_name(tool_name: str) -> str:
 def tool_purpose(tool_name: str) -> str:
     purposes = {
         "lookup_term": "Used to define or clarify a study concept.",
-        "search_course_notes": "Used to ground the answer in course-specific notes.",
+        "search_course_notes": "Used to ground the answer in available course notes.",
         "build_study_plan": "Used to create a structured review plan.",
-        "generate_practice_quiz": "Used to create practice questions for active recall.",
+        "generate_practice_quiz": "Used to create topic-specific practice questions.",
     }
     return purposes.get(tool_name, "Used as supporting information for the answer.")
 
@@ -69,26 +73,20 @@ def extract_sources(tool_trace: List[Dict[str, Any]]) -> List[str]:
         result = item.get("result", {})
 
         if tool_name == "lookup_term":
-            source = result.get("source", "dictionary/fallback")
+            source = result.get("source", "")
             if source and source != "none":
                 sources.append(f"Dictionary source: {source}")
-            else:
-                sources.append("General explanation used because no dictionary entry was found.")
 
         elif tool_name == "search_course_notes":
             matches = result.get("matches", [])
             if matches:
                 topics = [note.get("topic", "Course note") for note in matches]
                 sources.append("Course notes: " + ", ".join(topics))
-            else:
-                sources.append("Course notes searched, but no direct match was found.")
 
         elif tool_name == "build_study_plan":
             topics = result.get("topics", [])
             if topics:
                 sources.append("Study plan generated for: " + ", ".join(topics))
-            else:
-                sources.append("Study plan builder used.")
 
         elif tool_name == "generate_practice_quiz":
             topic = result.get("topic", "selected topic")
@@ -154,16 +152,16 @@ def render_quiz_cards(quiz_result: Dict[str, Any]):
 
 def render_sources(tool_trace: List[Dict[str, Any]]):
     if not tool_trace:
-        st.info("No tools were needed for this response.")
         return
 
-    st.markdown("### Sources Used")
-
     sources = extract_sources(tool_trace)
-    for source in sources:
-        st.success(source)
 
-    st.markdown("### Tool Decisions")
+    if sources:
+        st.markdown("### Learning Resources Used")
+        for source in sources:
+            st.success(source)
+
+    st.markdown("### How MentorMate Built This Answer")
     for index, item in enumerate(tool_trace, start=1):
         tool_name = item.get("tool", "")
         st.markdown(f"**{index}. {tool_display_name(tool_name)}**")
@@ -174,8 +172,14 @@ def render_debug_trace(tool_trace: List[Dict[str, Any]]):
     if not tool_trace:
         return
 
-    with st.expander("Developer view: raw tool trace"):
+    show_debug = st.checkbox("Show developer tool trace")
+    if show_debug:
         st.json(tool_trace)
+
+
+def build_mode_prompt(mode: str, user_input: str) -> str:
+    instruction = HELP_MODES.get(mode, "Help the student with the following request:")
+    return f"{instruction}\n\n{user_input.strip()}"
 
 
 def run_prompt(prompt: str):
@@ -209,7 +213,7 @@ def main():
         <div style="padding: 1rem 0 0.5rem 0;">
             <h1 style="margin-bottom: 0;">📚 MentorMate</h1>
             <p style="font-size: 1.1rem; color: #666;">
-                A grounded AI study companion for explanations, course-note support, quizzes, and exam planning.
+                An AI study companion for explanations, summaries, quizzes, study guides, and exam planning.
             </p>
         </div>
         """,
@@ -222,57 +226,67 @@ def main():
     with st.sidebar:
         st.header("How MentorMate helps")
         st.write(
-            "MentorMate is designed for students who want study support that is more grounded and actionable than a basic chatbot."
+            "MentorMate helps students understand academic topics, prepare for exams, and turn study questions into useful learning materials."
         )
 
         st.markdown("**It can:**")
         st.markdown(
             """
-            - Explain technical concepts
-            - Search course notes
+            - Explain academic concepts
+            - Summarize study material
             - Build study plans
             - Generate practice quizzes
-            - Show which tools supported the answer
+            - Create complete study guides
+            - Show supporting tools when used
             """
         )
 
         st.markdown("---")
         st.markdown("**Best for:**")
-        st.caption("Generative AI concepts, assignment review, exam preparation, practice questions, and study planning.")
+        st.caption(
+            "Biology, chemistry, math, computer science, history, business, exam prep, study guides, and study planning."
+        )
 
-    st.markdown("### What do you need help with?")
+    st.markdown("### Choose what kind of help you want")
 
-    col1, col2, col3, col4, col5 = st.columns(5)
+    if "selected_mode" not in st.session_state:
+        st.session_state.selected_mode = "Explain"
 
-    if "selected_prompt" not in st.session_state:
-        st.session_state.selected_prompt = ""
+    col1, col2, col3, col4, col5, col6 = st.columns(6)
 
     with col1:
         if st.button("Explain", use_container_width=True):
-            st.session_state.selected_prompt = SAMPLE_PROMPTS["Explain Concept"]
+            st.session_state.selected_mode = "Explain"
 
     with col2:
         if st.button("Summarize", use_container_width=True):
-            st.session_state.selected_prompt = SAMPLE_PROMPTS["Summarize Notes"]
+            st.session_state.selected_mode = "Summarize"
 
     with col3:
         if st.button("Study Plan", use_container_width=True):
-            st.session_state.selected_prompt = SAMPLE_PROMPTS["Make Study Plan"]
+            st.session_state.selected_mode = "Study Plan"
 
     with col4:
         if st.button("Quiz Me", use_container_width=True):
-            st.session_state.selected_prompt = SAMPLE_PROMPTS["Practice Quiz"]
+            st.session_state.selected_mode = "Quiz Me"
 
     with col5:
+        if st.button("Study Mode", use_container_width=True):
+            st.session_state.selected_mode = "Study Mode"
+
+    with col6:
         if st.button("Compare", use_container_width=True):
-            st.session_state.selected_prompt = SAMPLE_PROMPTS["Compare Concepts"]
+            st.session_state.selected_mode = "Compare"
+
+    st.info(f"Selected mode: **{st.session_state.selected_mode}**")
 
     user_input = st.text_area(
-        "Enter your study question, topic, or deadline",
-        value=st.session_state.selected_prompt,
-        height=150,
+        "Type your own topic, question, notes, or exam goal",
+        height=160,
         placeholder=(
-            "Example: Generate a practice quiz on grounding in generative AI."
+            "Example: anatomy of frog\n"
+            "Example: photosynthesis\n"
+            "Example: I have a biology exam in 3 days on frog anatomy and respiration."
         ),
     )
 
@@ -280,25 +294,32 @@ def main():
 
     if ask_button:
         if not user_input.strip():
-            st.warning("Please enter a study question or choose one of the quick actions.")
+            st.warning("Please type a topic, question, notes, or exam goal.")
             return
 
-        run_prompt(user_input.strip())
+        final_prompt = build_mode_prompt(st.session_state.selected_mode, user_input)
+        run_prompt(final_prompt)
 
     st.markdown("---")
 
-    with st.expander("Example requests you can try"):
-        for label, prompt in SAMPLE_PROMPTS.items():
-            st.markdown(f"**{label}:** {prompt}")
+    with st.expander("How to use MentorMate"):
+        st.markdown(
+            """
+            1. Choose the type of help you want.
+            2. Type any academic topic or study question.
+            3. MentorMate will decide whether it can answer directly or whether a tool is useful.
+            4. If a tool is used, you can see how the response was supported.
+            """
+        )
 
-    with st.expander("What makes this different from a regular chatbot?"):
+    with st.expander("How MentorMate works"):
         st.markdown(
             """
             MentorMate uses an agentic workflow. The model decides whether it needs a tool,
-            chooses the best tool, reads the result, and then creates a response.
+            chooses the best tool, reads the result, and then creates a student-friendly response.
 
-            Instead of only relying on model memory, it can use dictionary lookup,
-            course-note grounding, study-plan generation, and practice quiz generation.
+            For simple explanations, it may answer directly. For quizzes, study plans, definitions,
+            or grounded course material, it can use supporting tools behind the scenes.
             """
         )
 
