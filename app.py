@@ -31,7 +31,8 @@ SYSTEM_PROMPT = {
     "content": (
         "You are MentorMate, an agentic study companion for students. "
         "Use tools when they help the user: lookup_term for definitions, "
-        "search_course_notes for course-specific context, and build_study_plan for study schedules. "
+        "search_course_notes for course-specific context, build_study_plan for study schedules, "
+        "and generate_practice_quiz for practice questions, quizzes, self-testing, or exam practice. "
         "The model decides whether a tool is needed and which tool to use. "
         "When a tool returns useful information, use it to ground your answer. "
         "If a tool returns found=false, no matches, no useful data, or an error, do not apologize, "
@@ -104,6 +105,25 @@ TOOL_DEFINITIONS = [
                 },
             },
             "required": ["topics", "deadline"],
+        },
+    },
+    {
+        "name": "generate_practice_quiz",
+        "description": "Create a short practice quiz for a student based on a topic or course concept.",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "topic": {
+                    "type": "string",
+                    "description": "The topic or concept the quiz should focus on.",
+                },
+                "num_questions": {
+                    "type": "integer",
+                    "description": "Number of practice questions to generate.",
+                    "default": 5,
+                },
+            },
+            "required": ["topic"],
         },
     },
 ]
@@ -262,10 +282,61 @@ async def build_study_plan(
     }
 
 
+async def generate_practice_quiz(topic: str, num_questions: int = 5) -> Dict[str, Any]:
+    topic = topic.strip()
+
+    questions = [
+        {
+            "question_number": 1,
+            "type": "Definition",
+            "question": f"Define {topic} in your own words.",
+            "answer": f"{topic} refers to the key concepts, principles, and ideas associated with the topic.",
+            "explanation": "Tests whether you understand the core definition rather than memorizing keywords."
+        },
+        {
+            "question_number": 2,
+            "type": "Application",
+            "question": f"How would {topic} be applied in a real-world situation?",
+            "answer": f"{topic} can be applied by connecting theoretical knowledge to practical decision-making and problem solving.",
+            "explanation": "Tests whether you can move beyond definitions and use the concept."
+        },
+        {
+            "question_number": 3,
+            "type": "Example",
+            "question": f"Provide an example that demonstrates {topic}.",
+            "answer": f"A valid example would show how {topic} works in practice and why it matters.",
+            "explanation": "Examples are one of the best ways to verify understanding."
+        },
+        {
+            "question_number": 4,
+            "type": "Comparison",
+            "question": f"What is the difference between {topic} and a related concept?",
+            "answer": "A strong answer should explain similarities and differences while identifying when each is appropriate.",
+            "explanation": "Comparison questions frequently appear on exams."
+        },
+        {
+            "question_number": 5,
+            "type": "Reflection",
+            "question": f"Why is {topic} important, and what might happen if it is ignored?",
+            "answer": f"The importance of {topic} comes from its impact on outcomes, decisions, or system performance.",
+            "explanation": "Tests deeper conceptual understanding."
+        }
+    ]
+
+    return {
+        "found": True,
+        "source": "practice_quiz_generator",
+        "topic": topic,
+        "num_questions": len(questions),
+        "questions": questions,
+        "summary": f"Generated a 5-question study quiz for {topic}."
+    }
+
 TOOL_HANDLERS = {
     "lookup_term": lookup_term,
     "search_course_notes": search_course_notes,
     "build_study_plan": build_study_plan,
+    "generate_practice_quiz": generate_practice_quiz,
 }
 
 
