@@ -1,142 +1,88 @@
-# Project 3 Roadmap
+# MentorMate Roadmap
 
-## Current implementation
+## Current Implementation
 
-The current MentorMate implementation uses a Streamlit front end with an agent loop in `app.py`. It supports three tools: `lookup_term`, `search_course_notes`, and `build_study_plan`. Evaluation is performed with `scripts/run_full_evaluation.py`, which writes output to `evaluation.md`.
+MentorMate is a deployed AI study companion built with Streamlit and a FastAPI-style agent backend in `app.py`. The application helps students explain academic concepts, generate practice quizzes, create study guides, compare concepts, summarize material, and build study plans.
 
-## 1. Project context
+The system supports four custom tools:
 
-This Project 3 draft is the capstone for the Generative AI course. It should combine prompt engineering, grounding, evaluation, and agentic architecture from earlier projects while shifting focus to production-quality delivery and real-world impact.
+- `lookup_term`
+- `search_course_notes`
+- `build_study_plan`
+- `generate_practice_quiz`
 
-## 2. Problem statement
+The model decides when to call these tools through OpenAI function calling, and the app displays tool-supported outputs in a student-friendly interface.
 
-Build an AI application that solves a concrete real-world problem by using an LLM-driven agent with at least one custom MCP tool. The draft should demonstrate a working deployed mini-app, not just a local proof-of-concept.
+## Project Goal
 
-## 3. Target user
+The goal of MentorMate is to help students turn academic questions into usable study support. Instead of functioning only as a general chatbot, MentorMate provides structured study workflows such as explanation, quiz generation, study planning, comparison, and study-guide creation.
 
-- A non-technical user who wants a practical AI assistant for the chosen problem domain.
-- Someone who needs an easy-to-use deployed application, not a code demo.
-- The instructor or grader evaluating the project.
+## Target Users
 
-## 4. MVP scope for this week
+- Students preparing for exams or assignments.
+- Students who need quick explanations of academic topics.
+- Learners who want practice questions, summaries, and study plans.
+- Users who want a simple study tool without needing to understand AI architecture.
 
-- Deploy a public URL that loads and accepts real user input.
-- Implement one custom MCP tool definition with name, description, and input schema.
-- Show the LLM calling that tool autonomously during a real interaction.
-- Include at least one agent loop where the model reads tool output and decides what to do next.
-- Create a project repository with a README and build log notes.
+## Architecture
 
-## 5. Out-of-scope items for the draft
+- `streamlit_app.py`: User-facing Streamlit interface.
+- `app.py`: Agent loop, system prompt, tool definitions, and tool execution.
+- `data/course_notes.json`: Local grounding source for study-related course concepts.
+- `data/fallback_dictionary.json`: Backup glossary for dictionary lookup.
+- `scripts/run_full_evaluation.py`: Evaluation runner.
+- `evaluation.md`: Recorded test cases and results.
 
-- A fully polished final product with every feature.
-- Complete edge-case coverage, but basic error handling is required.
-- Multi-user authentication or large-scale production infrastructure.
-- Supporting many different domains; focus on one useful, coherent use case.
+## Agentic Workflow
 
-## 6. Recommended tech stack
+1. User selects a study mode or types a request.
+2. The prompt is sent to the LLM with tool definitions.
+3. The LLM decides whether a tool is needed.
+4. If needed, the backend executes the selected tool.
+5. The tool result is returned to the model.
+6. The model generates a final student-facing answer.
 
-- Python backend using FastAPI, Flask, or Streamlit depending on deployment needs.
-- If using MCP tooling, FastAPI gives clearer API / tool server structure.
-- Frontend can be minimal HTML or Streamlit/Gradio UI for faster deployment.
-- Deploy on a free public hosting service (e.g. Railway, Render, Vercel, or Hugging Face if using Gradio).
-- Use OpenAI-compatible model access via environment variables for API keys.
+This satisfies the agentic requirement because the model, not hardcoded routing logic, decides whether to call tools and which tool to call.
 
-## 7. Hosting/deployment plan
+## Grounding Strategy
 
-- Choose a platform that supports Python web apps and public URLs.
-- Railway or Render are good for FastAPI/Flask apps with a free tier.
-- Streamlit Community Cloud or Hugging Face Spaces are easiest for Streamlit/Gradio.
-- Ensure the URL is not localhost and stays accessible for the instructor.
+MentorMate uses grounding through:
 
-## 8. System prompt design
+- Local course notes in `course_notes.json`
+- Dictionary API lookups
+- Fallback dictionary entries
+- Tool outputs returned to the model
 
-- Create a system prompt that defines the model’s role clearly.
-- Example: “You are an autonomous AI assistant for [problem]. Use available tools when needed, ask clarifying questions, and return actionable results.”
-- If using multiple agents, give each a tailored system prompt reflecting its purpose.
-- Include behavior constraints, output format expectations, and the tool policy.
+The system can answer general academic questions directly, while using grounded sources when available.
 
-## 9. Prompt engineering techniques to use
+## Evaluation Strategy
 
-- Use few-shot examples for the tool-call format and expected responses.
-- Add explicit instructions for when to call tools versus when to answer directly.
-- Provide a clear output template for agent responses and summaries.
-- Document at least two prompt versions and the changes made between them.
+MentorMate is evaluated using structured test cases that check:
 
-## 10. Grounding strategy
+- Whether the model selects the correct tool.
+- Whether tool calls execute successfully.
+- Whether final answers use tool outputs.
+- Whether outputs are useful for student learning.
+- Whether the UI presents results clearly.
 
-- Ground the model with real context it cannot infer from pretraining.
-- Use live data from the custom tool (API results, database, or files) rather than only static prompts.
-- Optionally include curated domain knowledge or example cases in the prompt.
-- Ensure the model receives structured facts before making decisions.
+Evaluation results are recorded in `evaluation.md`.
 
-## 11. Coding plan
+## Completed Improvements
 
-- Step 1: choose the problem domain and define the target user.
-- Step 2: scaffold the app and deploy a basic public UI.
-- Step 3: implement the MCP tool definition and tool execution loop.
-- Step 4: add the LLM orchestration layer so the model decides whether to call the tool.
-- Step 5: implement grounding and system prompt logic.
-- Step 6: test the live app, capture tool-call traces, and document outputs.
+- Deployed the app publicly on Streamlit Cloud.
+- Added multiple custom tools.
+- Implemented an LLM-driven tool loop.
+- Added prompt version documentation in `PROMPT_LOG.md`.
+- Expanded the build log to show project evolution.
+- Improved UI/UX with study modes and quiz cards.
+- Hid raw JSON traces behind an optional developer view.
+- Expanded grounding data.
+- Improved quiz generation to support user-selected academic topics.
 
-## 12. Test harness / evaluation plan
+## Remaining Future Improvements
 
-- Create a set of example inputs to exercise the app’s core behavior.
-- Record test cases that show the model calling the tool and using results.
-- Evaluate success based on correct agent decisions and useful final responses.
-- Log failures and iterate on prompt/tool definitions.
-
-## 13. Success metrics
-
-- Public app URL is reachable and interactive.
-- Custom MCP tool is defined, exposed, and executed in a real session.
-- The LLM makes at least one autonomous decision via tool use.
-- The draft includes a GitHub repo with README and build notes.
-- The system can handle sample inputs and returns coherent, grounded outputs.
-
-## 14. Risks and limitations
-
-- Deployment may sleep or time out on free hosting.
-- API keys must be handled securely; misconfiguration can break the app.
-- The model may choose not to call the tool unless prompts and tool descriptions are precise.
-- Real-world data sources may be unavailable if service limits or network issues occur.
-
-## 15. GitHub commit plan
-
-- Commit 1: initial scaffold and project README.
-- Commit 2: MVP app with public deployment and basic UI.
-- Commit 3: custom MCP tool definition and execution logic.
-- Commit 4: agentic orchestration and system prompt improvements.
-- Commit 5: test cases, evaluation notes, and build log documentation.
-
-## 16. README/build log plan
-
-- Document the problem, architecture, and deployment URL.
-- Explain the MCP tool, its schema, and how the model uses it.
-- Include a sample interaction with tool call trace.
-- Add a build log section listing prompt versions, experiments, and what changed.
-- Describe known limitations and next steps.
-
-## 17. Questions I need to answer before coding
-
-- What exact problem should the app solve, and who is the target user?
-- Should I build this with Python Streamlit/Gradio or use FastAPI/Flask?
-- Which hosting option is easiest and reliable for the deadline?
-- How will I store API keys safely in deployment?
-- Can I implement a draft that works without paid API keys, or is paid access required?
-- What sample inputs demonstrate the app’s value clearly?
-- What does a successful output look like for this application?
-
-## 18. Step-by-step task list for building the MVP
-
-1. Define the concrete use case and target user.
-2. Choose the framework and hosting platform.
-3. Create the project repository and initial README.
-4. Build the public UI and deploy a first working version.
-5. Define the custom MCP tool with name, description, and schema.
-6. Implement the tool executor and response loop.
-7. Write a system prompt and agent behavior prompt.
-8. Add grounding context and example tool-call prompts.
-9. Test with sample inputs and record whether the tool is called.
-10. Capture evaluation notes and document roadmap progress.
-11. Save the deployment URL, GitHub repo link, and write-up outline.
-12. Iterate on prompt design and fix tool-call failures.
+- Add file upload so students can generate quizzes and study guides from their own notes.
+- Add PDF parsing for lecture slides or readings.
+- Add downloadable study guides and quizzes.
+- Add session history.
+- Add optional web search grounding for current information.
