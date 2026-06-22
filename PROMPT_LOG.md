@@ -36,7 +36,7 @@ The project requirements emphasized autonomous decision making and tool executio
 ## Prompt
 
 ```text
-You are MentorMate, an agentic study companion for students in a generative AI course.
+You are MentorMate, an agentic study companion for students across academic subjects.
 
 When the user asks for a definition or explanation of a term, call the lookup_term tool and base your answer on its result.
 
@@ -125,6 +125,30 @@ Explain the Big Bang Theory
 previously exposed tool failure messages. After the prompt update, MentorMate provides a natural explanation of the concept without mentioning failed lookups or internal processing details.
 
 ---
+
+# Prompt Version 4: General Academic Study Companion
+
+## What Changed
+
+As the project evolved, MentorMate expanded beyond Generative AI coursework into a broader academic study assistant.
+
+The system prompt was updated to support:
+
+- Concept explanations
+- Study guides
+- Practice quizzes
+- Study planning
+- Concept comparison
+
+while preserving agentic tool selection and grounding behavior.
+
+## Why It Changed
+
+Earlier versions focused heavily on Generative AI concepts because they were developed during the course. However, real students study many subjects. Expanding MentorMate into a general study companion improved practical usefulness and better aligned with the goal of creating a real-world AI application.
+
+## Result
+
+MentorMate can now support a wider variety of academic topics such as biology, chemistry, mathematics, history, and computer science while still demonstrating tool usage, grounding, and agentic behavior.
 
 # Lessons Learned
 
